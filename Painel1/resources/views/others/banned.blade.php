@@ -1,1 +1,0 @@
-tu foi banido meu chapa
