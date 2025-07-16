@@ -1,0 +1,243 @@
+
+          * {
+            font-family: 'Inter', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+                'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: #0e1015;
+            font-family: Inter;
+            font-style: normal;
+            padding: 0 32px;
+            overflow: hidden;
+        }
+
+        h1,
+        p {
+            margin: 0;
+            padding: 0;
+        }
+
+        table {
+            width: calc(100% + 16px);
+            border-spacing: 0;
+            margin: 0 -8px;
+        }
+
+        .header-logo {
+            position: absolute;
+            top: 28px;
+            left: 34px;
+        }
+
+        .header-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url(https://blitz-cdn.blitz.gg/blitz/blitz-email/auth/success/animation/blitz_logo_container.webp);
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 105px 105px;
+            animation: slideUpDown 1s ease-in-out;
+        }
+
+        .content {
+            width: fit-content;
+            padding: 24px;
+            border: 1px solid rgba(127, 131, 139, 0.15);
+            box-sizing: border-box;
+            border-radius: 12px;
+            margin: auto;
+        }
+
+        .upgrade-to-pro {
+            color: #c49c57;
+            font-weight: 700
+        }
+
+        .feature-card {
+            position: relative;
+            margin: 0 8px;
+        }
+
+        .feature-card p {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            color: #e3e5ea;
+            font-weight: bold;
+            font-size: 12px;
+            line-height: 20px;
+        }
+
+        .feature-card img {
+            width: 100%;
+        }
+
+        @keyframes  slideUpDown {
+            0% {
+                background-position-y: 60%;
+            }
+
+            50% {
+                background-position-y: 40%;
+            }
+
+            100% {
+                background-position-y: 50%;
+            }
+        }
+
+        @keyframes  fadeUp {
+            0% {
+                opacity: 0;
+                top: calc(50% - 40px);
+            }
+
+            50% {
+                opacity: 0;
+                top: calc(50% - 40px);
+            }
+
+            100% {
+                opacity: 1;
+                top: calc(50% - 70px);
+            }
+        }
+
+        @keyframes  fadeUpRotateLeft {
+            0% {
+                opacity: 0;
+                transform: rotate(-25deg) translateY(25px);
+            }
+
+            49% {
+                opacity: 0;
+                transform: rotate(-25deg) translateY(25px);
+            }
+
+            50% {
+                opacity: 1;
+                transform: rotate(-25deg) translateY(25px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: rotate(0deg) translateY(0px);
+            }
+        }
+
+        @keyframes  fadeUpRotateRight {
+            0% {
+                opacity: 0;
+                transform: rotate(25deg) translateY(25px);
+            }
+
+            49% {
+                opacity: 0;
+                transform: rotate(25deg) translateY(25px);
+            }
+
+            50% {
+                opacity: 1;
+                transform: rotate(25deg) translateY(25px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: rotate(0deg) translateY(0px);
+            }
+        }
+
+        @keyframes  fadeUpRotateLeft2 {
+            0% {
+                opacity: 0;
+                transform: rotate(-30deg) translateY(40px);
+            }
+
+            69% {
+                opacity: 0;
+                transform: rotate(-30deg) translateY(40px);
+            }
+
+            70% {
+                opacity: 1;
+                transform: rotate(-30deg) translateY(40px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: rotate(0deg) translateY(0px);
+            }
+        }
+
+        @keyframes  fadeUpRotateRight2 {
+            0% {
+                opacity: 0;
+                transform: rotate(30deg) translateY(40px);
+            }
+
+            69% {
+                opacity: 0;
+                transform: rotate(30deg) translateY(40px);
+            }
+
+            70% {
+                opacity: 1;
+                transform: rotate(30deg) translateY(40px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: rotate(0deg) translateY(0px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0 16px;
+            }
+
+            table {
+                width: 100%;
+                margin: 0 0 20px !important;
+            }
+
+            table tr {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            table td {
+                margin: 0 !important;
+            }
+
+            .header-logo {
+                top: 30px;
+                left: 24px;
+                transform: scale(0.8);
+            }
+
+            .header-image {
+                background-size: 600px 400px;
+                transform: scale(0.75) !important;
+            }
+
+            .content {
+                width: 100% !important;
+                max-width: 480px !important;
+            }
+
+            .feature-card {
+                margin: 0 0 16px !important;
+            }
+
+            .feature-card img {
+                width: 100% !important;
+            }
+        }
+
+   

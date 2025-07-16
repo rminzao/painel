@@ -1,0 +1,39 @@
+{
+    "name": "amorim778/truetank",
+    "description": "web service truetank",
+    "minimum-stability": "stable",
+    "authors": [
+        {
+            "name": "Gabriel Amorim",
+            "email": "gabriel.amorim7788@gmail.com",
+            "homepage": "https://github.com/amorim778",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Core\\": "core/"
+        },
+        "files": [
+            "core/helpers.php"
+        ]
+    },
+    "require": {
+        "php": "^8.1",
+        "ext-pdo": "^8.1",
+        "phpmailer/phpmailer": "~6.0",
+        "squizlabs/php_codesniffer": "^3.6",
+        "filp/whoops": "^2.14",
+        "illuminate/database": "^9.1",
+        "illuminate/view": "^9.1",
+        "vlucas/phpdotenv": "^5.4",
+        "google/apiclient": "^2.12",
+        "mercadopago/dx-php": "^2.4",
+        "telegram-bot/api": "^2.3",
+        "rosell-dk/webp-convert": "^2.9",
+        "guzzlehttp/guzzle": "^7.4",
+        "coffeecode/optimizer": "^2.1",
+        "pusher/pusher-php-server": "^7.0"
+    }
+}
