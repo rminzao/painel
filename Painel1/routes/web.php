@@ -242,7 +242,7 @@ $router->post('/admin/gameutils/fugura/delete/{id}', [
     fn ($id) => (new FuguraController())->destroy($id)
 ]);
 
-// edição dos itens dentro das fuguras - rmdev
+// edição dos itens dentro das fuguras
 $router->get('/admin/gameutils/fugura/{id}/items', [
     'middleware' => ['require-admin-view'],
     fn ($id) => (new FuguraController())->getItems($id)
