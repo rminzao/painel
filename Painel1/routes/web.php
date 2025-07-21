@@ -242,6 +242,39 @@ $router->post('/admin/gameutils/fugura/delete/{id}', [
     fn ($id) => (new FuguraController())->destroy($id)
 ]);
 
+// edição dos itens dentro das fuguras - rmdev
+$router->get('/admin/gameutils/fugura/{id}/items', [
+    'middleware' => ['require-admin-view'],
+    fn ($id) => (new FuguraController())->getItems($id)
+]);
+
+$router->post('/admin/gameutils/fugura/{id}/items', [
+    'middleware' => ['require-admin-view'],
+    fn ($id) => (new FuguraController())->addItem($id)
+]);
+
+$router->post('/admin/gameutils/fugura/{id}/items/{itemId}/update', [
+    'middleware' => ['require-admin-view'],
+    fn ($id, $itemId) => (new FuguraController())->updateItem($id, $itemId)
+]);
+
+$router->post('/admin/gameutils/fugura/{id}/items/{itemId}/delete', [
+    'middleware' => ['require-admin-view'],
+    fn ($id, $itemId) => (new FuguraController())->deleteItem($id, $itemId)
+]);
+
+$router->get('/admin/gameutils/items/search', [
+    'middleware' => ['require-admin-view'],
+    fn () => (new FuguraController())->searchItems()
+]);
+
+$router->get('/admin/gameutils/items/info', [
+    'middleware' => ['require-admin-view'],
+    fn () => (new FuguraController())->getShopItemInfo()
+]);
+
+//  FIM ROTA DAS FUGURAS
+
 $router->get('/admin/game/users', [
   'middleware' => [
     'require-admin-view'
