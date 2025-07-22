@@ -243,6 +243,7 @@ $router->post('/admin/gameutils/fugura/delete/{id}', [
 ]);
 
 // edição dos itens dentro das fuguras
+
 $router->get('/admin/gameutils/fugura/{id}/items', [
     'middleware' => ['require-admin-view'],
     fn ($id) => (new FuguraController())->getItems($id)
@@ -321,12 +322,50 @@ $router->get('/admin/game/quest', [
   ],
   fn () => new Response(200, (new Admin\Quest())->index())
 ]);
-$router->get('/admin/game/suit', [
-  'middleware' => [
-    'require-admin-view'
-  ],
-  fn ($id) => new Response(200, (new Admin\Game\Suit())->index($id))
+
+## NPC System - rmdev
+
+$router->get('/admin/game/npc', [
+    'middleware' => ['require-admin-view'],
+    fn () => new Response(200, (new Admin\Game\Npc())->index())
 ]);
+
+$router->get('/admin/game/npc/show/{id}', [
+    'middleware' => ['require-admin-view'],
+    fn ($id) => (new Admin\Game\Npc())->show($id)
+]);
+
+$router->post('/admin/game/npc/store', [
+    'middleware' => ['require-admin-view'],
+    fn () => (new Admin\Game\Npc())->store()
+]);
+
+$router->post('/admin/game/npc/{id}/details', [
+    'middleware' => ['require-admin-view'],
+    fn ($id) => (new Admin\Game\Npc())->updateDetails($id)
+]);
+
+$router->post('/admin/game/npc/{id}/attributes', [
+    'middleware' => ['require-admin-view'],
+    fn ($id) => (new Admin\Game\Npc())->updateAttributes($id)
+]);
+
+$router->post('/admin/game/npc/{id}/delete', [
+    'middleware' => ['require-admin-view'],
+    fn ($id) => (new Admin\Game\Npc())->destroy($id)
+]);
+
+$router->get('/admin/game/npc/calculate', [
+    'middleware' => ['require-admin-view'],
+    fn () => (new Admin\Game\Npc())->calculateAttributes()
+]);
+
+$router->post('/admin/game/npc', [
+    'middleware' => ['require-admin-view'],
+    fn () => (new Admin\Game\Npc())->store()
+]);
+# Fim rotas de NPC
+
 $router->get('/admin/game/map', [
   'middleware' => [
     'require-admin-view'

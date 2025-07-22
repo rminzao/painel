@@ -368,7 +368,7 @@
                                                             <span class="menu-bullet">
                                                                 <span class="bullet bullet-dot"></span>
                                                             </span>
-                                                            <span class="menu-title">Conjuntos</span>
+                                                            <span class="menu-title">NPC</span>
                                                         </a>
                                                     </div>
                                                     <div class="menu-item">

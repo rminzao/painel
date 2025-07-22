@@ -1,6 +1,6 @@
 @php
 $theme = $_COOKIE['user_theme'] ?? '';
-$asset = ($theme != '' and $theme == 'dark') || $session->has('clientUser') ? 'dark.' : '';
+$asset = ($theme != '' and $theme == 'dark') || (isset($_SESSION['clientUser']) && $_SESSION['clientUser']) ? 'dark.' : '';
 @endphp
 <!DOCTYPE html>
 
