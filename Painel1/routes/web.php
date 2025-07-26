@@ -6,7 +6,6 @@ use App\Http\Controllers\Web\Admin\FuguraController;
 use App\Http\Controllers\Web;
 use App\Http\Controllers\Web\Admin;
 
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,7 +16,6 @@ use App\Http\Controllers\Web\Admin;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
 
 $router->get('/', [
   'middleware' => [
@@ -215,8 +213,7 @@ $router->get('/admin/ecommerce/invoice/create', [
   fn () => new Response(200, (new Admin\Invoice())->create())
 ]);
 
-## Fugura by rmdev
-
+#region Fugura System
 $router->get('/admin/gameutils/fugura', [
     'middleware' => ['require-admin-view'],
     fn () => new Response(200, (new FuguraController())->index())
@@ -241,8 +238,6 @@ $router->post('/admin/gameutils/fugura/delete/{id}', [
     'middleware' => ['require-admin-view'],
     fn ($id) => (new FuguraController())->destroy($id)
 ]);
-
-// edição dos itens dentro das fuguras
 
 $router->get('/admin/gameutils/fugura/{id}/items', [
     'middleware' => ['require-admin-view'],
@@ -273,8 +268,7 @@ $router->get('/admin/gameutils/items/info', [
     'middleware' => ['require-admin-view'],
     fn () => (new FuguraController())->getShopItemInfo()
 ]);
-
-//  FIM ROTA DAS FUGURAS
+#endregion
 
 $router->get('/admin/game/users', [
   'middleware' => [
@@ -323,8 +317,7 @@ $router->get('/admin/game/quest', [
   fn () => new Response(200, (new Admin\Quest())->index())
 ]);
 
-## NPC System - rmdev
-
+#region NPC System
 $router->get('/admin/game/npc', [
     'middleware' => ['require-admin-view'],
     fn () => new Response(200, (new Admin\Game\Npc())->index())
@@ -364,7 +357,106 @@ $router->post('/admin/game/npc', [
     'middleware' => ['require-admin-view'],
     fn () => (new Admin\Game\Npc())->store()
 ]);
-# Fim rotas de NPC
+#endregion
+
+// ROTAS MISSIONS - by rm
+
+// Página principal de missões
+$router->get('/admin/game/event/missions', [
+    'middleware' => ['require-admin-view'],
+    fn () => new Response(200, (new \App\Http\Controllers\Web\Admin\Events\Mission())->index())
+]);
+
+//  API para dados de missões
+$router->get('/admin/game/event/missions/data', [
+    'middleware' => ['require-admin-view'],
+    fn () => (new \App\Http\Controllers\Web\Admin\Events\Mission())->getData()
+]);
+
+//  Mostrar missão específica
+$router->get('/admin/game/event/missions/show/{activityType}/{subActivityType}', [
+    'middleware' => ['require-admin-view'],
+    fn ($activityType, $subActivityType) => (new \App\Http\Controllers\Web\Admin\Events\Mission())->show($activityType, $subActivityType)
+]);
+
+//  Criar nova missão
+$router->post('/admin/game/event/missions/store', [
+    'middleware' => ['require-admin-view'],
+    fn () => (new \App\Http\Controllers\Web\Admin\Events\Mission())->store()
+]);
+
+//  Atualizar missão existente
+$router->post('/admin/game/event/missions/{activityType}/{subActivityType}/update', [
+    'middleware' => ['require-admin-view'],
+    fn ($activityType, $subActivityType) => (new \App\Http\Controllers\Web\Admin\Events\Mission())->update($activityType, $subActivityType)
+]);
+
+// Deletar missão
+$router->delete('/admin/game/event/missions/{activityType}/{subActivityType}/delete', [
+    'middleware' => ['require-admin-view'],
+    fn ($activityType, $subActivityType) => (new \App\Http\Controllers\Web\Admin\Events\Mission())->destroy($activityType, $subActivityType)
+]);
+
+// RECOMPENSAS DE MISSÕES
+
+// Listar recompensas da missão
+$router->get('/admin/game/event/missions/{activityType}/{subActivityType}/items', [
+    'middleware' => ['require-admin-view'],
+    fn ($activityType, $subActivityType) => (new \App\Http\Controllers\Web\Admin\Events\Mission())->getItems($activityType, $subActivityType)
+]);
+
+// Adicionar nova recompensa
+$router->post('/admin/game/event/missions/{activityType}/{subActivityType}/items', [
+    'middleware' => ['require-admin-view'],
+    fn ($activityType, $subActivityType) => (new \App\Http\Controllers\Web\Admin\Events\Mission())->addItem($activityType, $subActivityType)
+]);
+
+// EDITAR recompensa específica (updateItem) - ROTA CORRIGIDA
+$router->post('/admin/game/event/missions/{activityType}/{subActivityType}/items/{templateId}/update', [
+    'middleware' => ['require-admin-view'],
+    fn ($activityType, $subActivityType, $templateId) => (new \App\Http\Controllers\Web\Admin\Events\Mission())->updateItem($activityType, $subActivityType, $templateId)
+]);
+
+// DELETAR recompensa específica (deleteItem) - MÉTODO POST
+$router->post('/admin/game/event/missions/{activityType}/{subActivityType}/items/{templateId}/delete', [
+    'middleware' => ['require-admin-view'],
+    fn ($activityType, $subActivityType, $templateId) => (new \App\Http\Controllers\Web\Admin\Events\Mission())->deleteItem($activityType, $subActivityType, $templateId)
+]);
+
+// Deletar TODAS as recompensas de uma missão
+$router->delete('/admin/game/event/missions/{activityType}/{subActivityType}/items/all', [
+    'middleware' => ['require-admin-view'],
+    fn ($activityType, $subActivityType) => (new \App\Http\Controllers\Web\Admin\Events\Mission())->deleteAllItems($activityType, $subActivityType)
+]);
+
+// 🔍 UTILITÁRIOS DE BUSCA
+
+// Buscar itens no ShopGoods
+$router->get('/admin/game/event/missions/items/search', [
+    'middleware' => ['require-admin-view'],
+    fn () => (new \App\Http\Controllers\Web\Admin\Events\Mission())->searchItems()
+]);
+
+// Informações detalhadas do item
+$router->get('/admin/game/event/missions/items/info', [
+    'middleware' => ['require-admin-view'],
+    fn () => (new \App\Http\Controllers\Web\Admin\Events\Mission())->getShopItemInfo()
+]);
+
+// ROTAS DE TESTE - q por incrivel q pareça funcionou e as reais nao 
+$router->post('/test/update-item/{activityType}/{subActivityType}/{templateId}', [
+    fn ($activityType, $subActivityType, $templateId) => (new \App\Http\Controllers\Web\Admin\Events\Mission())->testUpdateItem($activityType, $subActivityType, $templateId)
+]);
+
+$router->post('/test/delete-item/{activityType}/{subActivityType}/{templateId}', [
+    fn ($activityType, $subActivityType, $templateId) => (new \App\Http\Controllers\Web\Admin\Events\Mission())->testDeleteItem($activityType, $subActivityType, $templateId)
+]);
+
+$router->get('/test/debug-routes', [
+    fn () => (new \App\Http\Controllers\Web\Admin\Events\Mission())->debugRoutes()
+]);
+
+#endregion
 
 $router->get('/admin/game/map', [
   'middleware' => [
@@ -408,13 +500,6 @@ $router->get('/admin/game/event/activity-system', [
   ],
   fn ($id) => new Response(200, (new Admin\Events\ActivitySystem())->index($id))
 ]);
-$router->get('/admin/game/event/activity-quest', [
-  'middleware' => [
-    'require-admin-view'
-  ],
-  fn () => new Response(200, (new Admin\Events\ActivityQuest())->index())
-]);
-
 
 $router->get('/admin/game/utils/item/send', [
   'middleware' => [
@@ -449,16 +534,10 @@ $router->get('/admin/game/pve', [
   fn ($id) => new Response(200, (new Admin\Game\Pve())->index($id))
 ]);
 
-$router->get('/admin/blog', [
-  'middleware' => [
-    'require-admin-view'
-  ],
-  fn () => new Response(200, (new Admin\Blog())->index())
-]);
-
 $router->get('/admin/blog/criar', [
   'middleware' => [
     'require-admin-view'
   ],
   fn () => new Response(200, (new Admin\Blog())->create())
 ]);
+

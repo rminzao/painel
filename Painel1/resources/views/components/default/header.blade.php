@@ -325,7 +325,7 @@
                                                                 <span class="bullet bullet-dot"></span>
                                                             </span>
                                                             <span class="menu-title">
-                                                                Missão de atividade
+                                                                Atividades e Premiações
                                                             </span>
                                                         </a>
                                                     </div>

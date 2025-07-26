@@ -1,10 +1,706 @@
-/**
- * ======================================
- * NPC MANAGEMENT SYSTEM - JavaScript COM ATUALIZAÇÃO SILENCIOSA DE XML
- * ======================================
- * Sistema completo para gerenciamento de NPCs
- * Versão final com atualização XML silenciosa
- */
+function injectCustomCSS() {
+    // Verificar se o CSS já foi injetado
+    if (document.getElementById('npc-custom-styles')) {
+        return;
+    }
+
+    const css = `
+        /* ============================================================================ */
+        /* 🎨 SISTEMA DE NPCs - CSS MODERNO E REFINADO */
+        /* ============================================================================ */
+
+        /* ========================================= */
+        /* 🌍 CONFIGURAÇÕES GLOBAIS */
+        /* ========================================= */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important;
+            --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%) !important;
+            --info-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+            --light-gradient: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+            --glass-bg: rgba(255, 255, 255, 0.25) !important;
+            --glass-border: rgba(255, 255, 255, 0.18) !important;
+            --shadow-soft: 0 8px 32px rgba(31, 38, 135, 0.37) !important;
+            --shadow-hover: 0 12px 40px rgba(31, 38, 135, 0.5) !important;
+            --border-radius: 16px !important;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        /* ========================================= */
+        /* 📦 CARDS E CONTAINERS PRINCIPAIS */
+        /* ========================================= */
+        .card {
+            border-radius: var(--border-radius) !important;
+            border: 1px solid rgba(255, 255, 255, 0.125) !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px) !important;
+            box-shadow: var(--shadow-soft) !important;
+            transition: var(--transition) !important;
+            overflow: hidden !important;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.8) 100%) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+            backdrop-filter: blur(10px) !important;
+        }
+
+        /* ========================================= */
+        /* 🤖 LISTA DE NPCs - DESIGN REFINADO */
+        /* ========================================= */
+        .npc-item {
+            transition: var(--transition) !important;
+            border-radius: 12px !important;
+            margin-bottom: 1rem !important;
+            cursor: pointer !important;
+            position: relative !important;
+            overflow: hidden !important;
+            border: 2px solid transparent !important;
+            background: rgba(255, 255, 255, 0.8) !important;
+            backdrop-filter: blur(8px) !important;
+        }
+
+        .npc-item::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: -100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent) !important;
+            transition: left 0.5s ease !important;
+        }
+
+        .npc-item:hover::before {
+            left: 100% !important;
+        }
+
+        .npc-item:hover {
+            transform: translateY(-6px) scale(1.02) !important;
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.3) !important;
+            border-color: #667eea !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+        }
+
+        .npc-item.selected {
+            border-color: #667eea !important;
+            background: var(--primary-gradient) !important;
+            color: white !important;
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4) !important;
+            transform: translateY(-4px) !important;
+        }
+
+        .npc-item.selected * {
+            color: white !important;
+        }
+
+        /* Ícones dos NPCs com efeito 3D */
+        .npc-item .symbol-label {
+            background: var(--light-gradient) !important;
+            border: 2px solid rgba(255, 255, 255, 0.3) !important;
+            transition: var(--transition) !important;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+            position: relative !important;
+        }
+
+        .npc-item .symbol-label::after {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, transparent 50%) !important;
+            border-radius: inherit !important;
+            pointer-events: none !important;
+        }
+
+        .npc-item:hover .symbol-label {
+            background: var(--primary-gradient) !important;
+            border-color: rgba(255, 255, 255, 0.6) !important;
+            color: white !important;
+            transform: scale(1.15) rotateY(15deg) !important;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4) !important;
+        }
+
+        .npc-item.selected .symbol-label {
+            background: rgba(255, 255, 255, 0.2) !important;
+            border-color: rgba(255, 255, 255, 0.4) !important;
+            color: white !important;
+            transform: scale(1.1) !important;
+        }
+
+        /* ========================================= */
+        /* 📑 SISTEMA DE ABAS MELHORADO */
+        /* ========================================= */
+        .nav-tabs {
+            border: none !important;
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-radius: 12px !important;
+            padding: 4px !important;
+            backdrop-filter: blur(10px) !important;
+        }
+
+        .nav-link {
+            cursor: pointer !important;
+            transition: var(--transition) !important;
+            border: none !important;
+            border-radius: 8px !important;
+            margin: 0 2px !important;
+            padding: 12px 20px !important;
+            font-weight: 600 !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+        .nav-link::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: -100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent) !important;
+            transition: left 0.4s ease !important;
+        }
+
+        .nav-link:hover::before {
+            left: 100% !important;
+        }
+
+        .nav-link:hover {
+            background: rgba(102, 126, 234, 0.1) !important;
+            color: #667eea !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2) !important;
+        }
+
+        .nav-link.active {
+            background: var(--primary-gradient) !important;
+            color: white !important;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        /* ========================================= */
+        /* 🧮 CALCULADORA - DESIGN FUTURISTA */
+        /* ========================================= */
+        #calculation_results {
+            animation: slideInUp 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+            border-radius: var(--border-radius) !important;
+            padding: 24px !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        }
+
+        @keyframes slideInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Cards de atributos com efeito glassmorphism */
+        .bg-light-success, .bg-light-primary, .bg-light-warning, 
+        .bg-light-info, .bg-light-dark, .bg-light-secondary, 
+        .bg-light-danger {
+            transition: var(--transition) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            backdrop-filter: blur(8px) !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+        .bg-light-success {
+            background: linear-gradient(135deg, rgba(75, 192, 192, 0.15) 0%, rgba(75, 192, 192, 0.05) 100%) !important;
+        }
+
+        .bg-light-primary {
+            background: linear-gradient(135deg, rgba(54, 162, 235, 0.15) 0%, rgba(54, 162, 235, 0.05) 100%) !important;
+        }
+
+        .bg-light-warning {
+            background: linear-gradient(135deg, rgba(255, 206, 84, 0.15) 0%, rgba(255, 206, 84, 0.05) 100%) !important;
+        }
+
+        .bg-light-info {
+            background: linear-gradient(135deg, rgba(153, 102, 255, 0.15) 0%, rgba(153, 102, 255, 0.05) 100%) !important;
+        }
+
+        .bg-light-dark {
+            background: linear-gradient(135deg, rgba(108, 117, 125, 0.15) 0%, rgba(108, 117, 125, 0.05) 100%) !important;
+        }
+
+        .bg-light-secondary {
+            background: linear-gradient(135deg, rgba(128, 134, 139, 0.15) 0%, rgba(128, 134, 139, 0.05) 100%) !important;
+        }
+
+        .bg-light-danger {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.15) 0%, rgba(220, 53, 69, 0.05) 100%) !important;
+        }
+
+        /* Efeitos hover para cards de atributos */
+        .bg-light-success:hover { 
+            border-color: #4bc0c0 !important; 
+            transform: translateY(-4px) scale(1.02) !important; 
+            box-shadow: 0 8px 25px rgba(75, 192, 192, 0.3) !important;
+        }
+
+        .bg-light-primary:hover { 
+            border-color: #36a2eb !important; 
+            transform: translateY(-4px) scale(1.02) !important; 
+            box-shadow: 0 8px 25px rgba(54, 162, 235, 0.3) !important;
+        }
+
+        .bg-light-warning:hover { 
+            border-color: #ffce54 !important; 
+            transform: translateY(-4px) scale(1.02) !important; 
+            box-shadow: 0 8px 25px rgba(255, 206, 84, 0.3) !important;
+        }
+
+        .bg-light-info:hover { 
+            border-color: #9966ff !important; 
+            transform: translateY(-4px) scale(1.02) !important; 
+            box-shadow: 0 8px 25px rgba(153, 102, 255, 0.3) !important;
+        }
+
+        .bg-light-dark:hover { 
+            border-color: #6c757d !important; 
+            transform: translateY(-4px) scale(1.02) !important; 
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3) !important;
+        }
+
+        .bg-light-secondary:hover { 
+            border-color: #80868b !important; 
+            transform: translateY(-4px) scale(1.02) !important; 
+            box-shadow: 0 8px 25px rgba(128, 134, 139, 0.3) !important;
+        }
+
+        .bg-light-danger:hover { 
+            border-color: #dc3545 !important; 
+            transform: translateY(-4px) scale(1.02) !important; 
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3) !important;
+        }
+
+        /* ========================================= */
+        /* 🎛️ BOTÕES MODERNOS */
+        /* ========================================= */
+        .btn {
+            border-radius: 10px !important;
+            font-weight: 600 !important;
+            transition: var(--transition) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            border: none !important;
+        }
+
+        .btn::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: -100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent) !important;
+            transition: left 0.5s ease !important;
+        }
+
+        .btn:hover::before {
+            left: 100% !important;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient) !important;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6) !important;
+        }
+
+        .btn-success {
+            background: var(--success-gradient) !important;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4) !important;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.6) !important;
+        }
+
+        .btn-light-primary {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
+            color: #667eea !important;
+            border: 1px solid rgba(102, 126, 234, 0.3) !important;
+        }
+
+        .btn-light-primary:hover {
+            background: var(--primary-gradient) !important;
+            color: white !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+        }
+
+        .btn-light-success {
+            background: linear-gradient(135deg, rgba(75, 192, 192, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%) !important;
+            color: #4bc0c0 !important;
+            border: 1px solid rgba(75, 192, 192, 0.3) !important;
+        }
+
+        .btn-light-success:hover {
+            background: var(--success-gradient) !important;
+            color: white !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(75, 192, 192, 0.4) !important;
+        }
+
+        .btn-light-danger {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(255, 167, 38, 0.1) 100%) !important;
+            color: #ff6b6b !important;
+            border: 1px solid rgba(255, 107, 107, 0.3) !important;
+        }
+
+        .btn-light-danger:hover {
+            background: var(--danger-gradient) !important;
+            color: white !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4) !important;
+        }
+
+        /* Botões específicos da calculadora */
+        #btn_calculate_attributes {
+            background: var(--primary-gradient) !important;
+            border: none !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+        }
+
+        #btn_calculate_attributes:hover {
+            transform: translateY(-3px) scale(1.05) !important;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.6) !important;
+        }
+
+        #btn_apply_calculated {
+            background: var(--success-gradient) !important;
+            border: none !important;
+            font-weight: 700 !important;
+            box-shadow: 0 6px 20px rgba(75, 192, 192, 0.4) !important;
+        }
+
+        #btn_apply_calculated:hover {
+            transform: translateY(-3px) scale(1.05) !important;
+            box-shadow: 0 10px 30px rgba(75, 192, 192, 0.6) !important;
+        }
+
+        #btn_new_npc_calculated {
+            background: var(--warning-gradient) !important;
+            border: none !important;
+            font-weight: 700 !important;
+            box-shadow: 0 6px 20px rgba(247, 112, 154, 0.4) !important;
+        }
+
+        #btn_new_npc_calculated:hover {
+            transform: translateY(-3px) scale(1.05) !important;
+            box-shadow: 0 10px 30px rgba(247, 112, 154, 0.6) !important;
+        }
+
+        /* ========================================= */
+        /* 📝 FORMULÁRIOS E INPUTS */
+        /* ========================================= */
+        .form-control, .form-select {
+            border-radius: 8px !important;
+            border: 2px solid rgba(255, 255, 255, 0.2) !important;
+            background: rgba(255, 255, 255, 0.8) !important;
+            backdrop-filter: blur(8px) !important;
+            transition: var(--transition) !important;
+            font-weight: 500 !important;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea !important;
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25) !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        .form-label {
+            font-weight: 700 !important;
+            color: #495057 !important;
+            margin-bottom: 8px !important;
+            font-size: 0.875rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+        }
+
+        /* Select de dificuldade especial */
+        #difficulty_select {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.8) 100%) !important;
+            border: 2px solid rgba(102, 126, 234, 0.2) !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+        }
+
+        #difficulty_select:focus {
+            border-color: #667eea !important;
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        /* ========================================= */
+        /* 🔔 ALERTAS E NOTIFICAÇÕES */
+        /* ========================================= */
+        .alert {
+            border-radius: var(--border-radius) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            backdrop-filter: blur(10px) !important;
+            animation: slideInDown 0.5s ease-out !important;
+        }
+
+        @keyframes slideInDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, rgba(168, 237, 234, 0.2) 0%, rgba(254, 214, 227, 0.2) 100%) !important;
+            border-color: rgba(168, 237, 234, 0.3) !important;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(255, 206, 84, 0.2) 0%, rgba(255, 167, 38, 0.2) 100%) !important;
+            border-color: rgba(255, 206, 84, 0.3) !important;
+        }
+
+        .alert-light-primary {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
+            border-color: rgba(102, 126, 234, 0.2) !important;
+        }
+
+        /* ========================================= */
+        /* 📱 RESPONSIVIDADE */
+        /* ========================================= */
+        @media (max-width: 768px) {
+            .npc-item {
+                margin-bottom: 0.75rem !important;
+            }
+
+            .npc-item:hover {
+                transform: translateY(-3px) scale(1.01) !important;
+            }
+
+            .nav-link {
+                padding: 8px 12px !important;
+                font-size: 0.875rem !important;
+            }
+
+            .btn {
+                padding: 8px 16px !important;
+                font-size: 0.875rem !important;
+            }
+
+            #calculation_results {
+                padding: 16px !important;
+            }
+
+            .card {
+                border-radius: 12px !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .npc-item .symbol-label {
+                width: 40px !important;
+                height: 40px !important;
+                font-size: 1.25rem !important;
+            }
+
+            .nav-tabs {
+                flex-direction: column !important;
+            }
+
+            .nav-link {
+                margin: 2px 0 !important;
+                text-align: center !important;
+            }
+        }
+
+        /* ========================================= */
+        /* ✨ MICRO-ANIMAÇÕES E EFEITOS ESPECIAIS */
+        /* ========================================= */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% {
+                transform: translate3d(0, 0, 0);
+            }
+            40%, 43% {
+                transform: translate3d(0, -30px, 0);
+            }
+            70% {
+                transform: translate3d(0, -15px, 0);
+            }
+            90% {
+                transform: translate3d(0, -4px, 0);
+            }
+        }
+
+        /* Efeito de loading personalizado */
+        .spinner-border {
+            animation: spin 1s linear infinite !important;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Efeitos de hover para ícones */
+        .btn i, .symbol-label {
+            transition: var(--transition) !important;
+        }
+
+        .btn:hover i {
+            transform: scale(1.2) rotate(5deg) !important;
+        }
+
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar {
+            width: 6px !important;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-radius: 3px !important;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient) !important;
+            border-radius: 3px !important;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+        }
+
+        /* ========================================= */
+        /* 🎯 UTILITÁRIOS E ACABAMENTOS */
+        /* ========================================= */
+        .tab-content {
+            min-height: 400px !important;
+            padding: 20px !important;
+        }
+
+        .tab-pane {
+            display: none !important;
+            animation: fadeIn 0.4s ease-in-out !important;
+        }
+
+        .tab-pane.active {
+            display: block !important;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Separador estilizado */
+        .separator {
+            border-color: rgba(102, 126, 234, 0.2) !important;
+            margin: 2rem 0 !important;
+            position: relative !important;
+        }
+
+        .separator::after {
+            content: '✨' !important;
+            position: absolute !important;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            background: white !important;
+            padding: 0 10px !important;
+            font-size: 1.2rem !important;
+        }
+
+        /* Badge personalizado */
+        .badge {
+            border-radius: 6px !important;
+            font-weight: 600 !important;
+            padding: 6px 10px !important;
+            background: var(--primary-gradient) !important;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+        }
+
+        /* Tooltips melhorados */
+        [data-bs-toggle="tooltip"] {
+            position: relative !important;
+        }
+
+        /* Estados de foco melhorados */
+        .form-control:focus,
+        .form-select:focus,
+        .btn:focus {
+            outline: none !important;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25) !important;
+        }
+
+        /* Transições suaves para mudanças de estado */
+        * {
+            transition: var(--transition) !important;
+        }
+    `;
+
+    // Criar elemento style
+    const styleElement = document.createElement('style');
+    styleElement.id = 'npc-custom-styles';
+    styleElement.textContent = css;
+
+    // Inserir no head
+    document.head.appendChild(styleElement);
+
+    console.log('✅ CSS customizado do NPC injetado com sucesso!');
+}
+
+// CLASSE PRINCIPAL DO NPC MANAGER
 
 class NpcManager {
     constructor() {
@@ -12,7 +708,7 @@ class NpcManager {
         this.filteredNpcs = [...this.npcs];
         this.currentNpc = null;
         this.currentPage = 1;
-        this.itemsPerPage = 10;
+        this.itemsPerPage = 5;
         this.currentSearch = '';
         this.currentLevelFilter = 'all';
         this.lastCalculatedAttributes = null;
@@ -21,6 +717,9 @@ class NpcManager {
     }
 
     init() {
+        // Injetar CSS primeiro
+        injectCustomCSS();
+        
         this.setupEventListeners();
         this.setupTabSystem();
         this.loadNpcList();
@@ -31,9 +730,7 @@ class NpcManager {
         this.restoreSelectedNpc();
     }
 
-    // =====================================
     // ATUALIZAÇÃO SILENCIOSA DE XML
-    // =====================================
     
     async updateXmlSilently() {
         const refreshBtn = document.getElementById('button_refresh_list');
@@ -148,51 +845,15 @@ class NpcManager {
             }, 5000);
             
             // Fazer a requisição
-            iframe.src = 'https://ddtankprisma.com/quest/createallxml.ashx?' + Date.now();
+            iframe.src = 'https://evotank.com.br/quest/createallxml.ashx?' + Date.now();
             
         } catch (error) {
             console.error('Erro no método iframe:', error);
             this.showAlert('error', 'Erro!', 'Erro ao tentar atualização alternativa: ' + error.message);
         }
     }
-    
-    // Método usando window.open() mínimo (como último recurso)
-    updateXmlFallback() {
-        try {
-            // Abrir janela mínima
-            const popup = window.open(
-                'https://ddtankprisma.com/quest/createallxml.ashx',
-                'xmlUpdate',
-                'width=400,height=300,scrollbars=yes,resizable=yes'
-            );
-            
-            if (popup) {
-                // Tentar fechar automaticamente após 3 segundos
-                setTimeout(() => {
-                    try {
-                        popup.close();
-                        this.showAlert('success', 'XML Atualizada!', 'Base de dados atualizada com sucesso!');
-                        
-                        setTimeout(() => {
-                            this.smartRefresh();
-                        }, 1000);
-                    } catch (e) {
-                        // Se não conseguir fechar, avisar o usuário
-                        this.showAlert('info', 'Quase lá!', 'Por favor, feche a janela de atualização XML quando terminar.');
-                    }
-                }, 3000);
-            } else {
-                this.showAlert('warning', 'Popup Bloqueado!', 'Por favor, permita popups e tente novamente.');
-            }
-            
-        } catch (error) {
-            this.showAlert('error', 'Erro!', 'Erro ao abrir janela de atualização: ' + error.message);
-        }
-    }
 
-    // =====================================
     // SISTEMA DE SELEÇÃO PERSISTENTE
-    // =====================================
     
     saveSelectedNpc(npcId) {
         if (npcId) {
@@ -209,7 +870,7 @@ class NpcManager {
             setTimeout(() => {
                 const npc = this.npcs.find(n => n.ID == savedNpcId);
                 if (npc) {
-                    this.selectNpc(savedNpcId, false); // false = não salvar novamente
+                    this.selectNpc(savedNpcId, false);
                     console.log(`NPC #${savedNpcId} restaurado após reload`);
                 }
             }, 200);
@@ -220,9 +881,7 @@ class NpcManager {
         sessionStorage.removeItem('selected_npc_id');
     }
 
-    // =====================================
-    // SISTEMA DE TABS CORRIGIDO
-    // =====================================
+    // SISTEMA DE TABS
     
     setupTabSystem() {
         const tabLinks = document.querySelectorAll('#npc-tabs .nav-link');
@@ -265,9 +924,7 @@ class NpcManager {
         }
     }
 
-    // =====================================
-    // EVENT LISTENERS CORRIGIDOS
-    // =====================================
+    // EVENT LISTENERS
     
     setupEventListeners() {
         // Busca por nome/ID
@@ -389,9 +1046,7 @@ class NpcManager {
         }
     }
 
-    // =====================================
     // BUSCA E FILTROS
-    // =====================================
 
     handleSearch(searchTerm) {
         this.currentSearch = searchTerm.toLowerCase().trim();
@@ -439,9 +1094,7 @@ class NpcManager {
         this.renderNpcList();
     }
 
-    // =====================================
-    // RENDERIZAÇÃO DA LISTA
-    // =====================================
+    // RENDERIZAÇÃO 
 
     loadNpcList() {
         this.applyFilters();
@@ -548,9 +1201,7 @@ class NpcManager {
         }
     }
 
-    // =====================================
-    // SELEÇÃO DE NPC CORRIGIDA
-    // =====================================
+    // SELEÇÃO DE NPC
 
     selectNpc(id, saveToSession = true) {
         // Remove seleção anterior
@@ -574,7 +1225,7 @@ class NpcManager {
             this.showNpcData();
             this.populateForms(npc);
             
-            // Salvar seleção no sessionStorage se solicitado
+            // Salvar seleção no sessionStorage
             if (saveToSession) {
                 this.saveSelectedNpc(id);
             }
@@ -636,9 +1287,7 @@ class NpcManager {
         }
     }
 
-    // =====================================
-    // OPERAÇÕES CRUD (restante do código permanece igual)
-    // =====================================
+    // OPERAÇÕES CRUD
 
     async createNpc() {
         const form = document.getElementById('createForm');
@@ -909,9 +1558,7 @@ class NpcManager {
         }
     }
 
-    // =====================================
-    // CALCULADORA DE ATRIBUTOS CORRIGIDA
-    // =====================================
+    // CALCULADORA DE ATRIBUTOS
 
     async calculateAttributes() {
         const button = document.getElementById('btn_calculate_attributes');
@@ -968,7 +1615,7 @@ class NpcManager {
         this.lastCalculatedAttributes = attributes;
     }
 
-    // FUNÇÃO CORRIGIDA COM SELEÇÃO PERSISTENTE
+    // SELEÇÃO PERSISTENTE
     async applyCalculatedAttributes() {
         if (!this.currentNpc) {
             this.showAlert('warning', 'Atenção!', 'Nenhum NPC selecionado para aplicar os atributos!');
@@ -1081,12 +1728,10 @@ class NpcManager {
         }
     }
 
-    // =====================================
-    // UTILITÁRIOS CORRIGIDOS
-    // =====================================
+    // UTILITÁRIOS
 
     smartRefresh() {
-        // Aguardar um pouco e fazer reload - a seleção será restaurada automaticamente
+        // Aguardar um pouco e fazer reload
         setTimeout(() => {
             location.reload();
         }, 500);
@@ -1181,9 +1826,7 @@ class NpcManager {
     }
 }
 
-// =====================================
 // COMPATIBILIDADE E INICIALIZAÇÃO
-// =====================================
 
 // Função global para compatibilidade
 window.npc = {
@@ -1197,7 +1840,7 @@ window.npc = {
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         window.npcManager = new NpcManager();
-        console.log('NPC Manager iniciado com sucesso');
+        console.log('🚀 NPC Manager iniciado com sucesso e CSS injetado!');
     }, 100);
 });
 
