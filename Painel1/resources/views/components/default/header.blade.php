@@ -320,7 +320,7 @@
                                                     </div>
                                                     <div class="menu-item">
                                                         <a class="menu-link py-3"
-                                                            href="{{ url('admin/game/event/activity-quest') }}">
+                                                            href="{{ url('admin/game/event/missions') }}">
                                                             <span class="menu-bullet">
                                                                 <span class="bullet bullet-dot"></span>
                                                             </span>

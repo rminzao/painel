@@ -10,25 +10,14 @@ const mission = {
     // Nomes das missões por tipo
     missionNames: {
         1: "Recompensas por Aumentar de nível",
-        2: "Kill Monsters",
-        3: "Conseguir Itens",
-        4: "Conseguir Dinheiro",
-        5: "Conseguir Experiência",
+        2: "Vitória no PvP",
+        3: "Consumir Cupons - Acumulado",
+        4: "Força de combate",
+        5: "Recarga de cupons - Acumulado",
         6: "Conseguir Honor",
         7: "Conseguir Riches",
         8: "Conseguir GP",
         9: "Conseguir Offer",
-        10: "Conseguir Nimbus",
-        11: "Conseguir Academy",
-        12: "Conseguir Consortia",
-        13: "Conseguir Fight",
-        14: "Conseguir Dig",
-        15: "Conseguir Fish",
-        16: "Conseguir Pets",
-        17: "Conseguir Card",
-        18: "Conseguir Married",
-        19: "Conseguir Gym",
-        20: "Conseguir SPA"
     },
 
     // Inicialização
