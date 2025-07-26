@@ -608,6 +608,7 @@
     <script>
         window.npcData = @json($npcs ?? []);
         window.baseUrl = "{{ url('') }}";
+		window.xmlUpdateUrl = "{{ $_ENV['XML_UPDATE_URL'] ?? 'https://evotank.com.br/quest/createallxml.ashx' }}";
     </script>
 
     <!-- Sistema NPC -->

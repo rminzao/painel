@@ -1,4 +1,236 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {  
+    function addFiguraToList(figuraData) {
+        if (!parentContainer) {
+            return;
+        }
+
+        // CRIAR FIGURA COM ESTRUTURA COMPACTA PADRÃO
+        const newFigura = document.createElement('div');
+        newFigura.className = 'fugura-item';
+        newFigura.dataset.id = figuraData.ID;
+        newFigura.dataset.name = figuraData.Name;
+        newFigura.dataset.sex = figuraData.Sex || '0';
+        newFigura.dataset.type = figuraData.Type || '1';
+        newFigura.setAttribute('onclick', `selectFugura(${figuraData.ID})`);
+        
+        const sexIcon = figuraData.Sex == '1' ? '👦' : figuraData.Sex == '2' ? '👧' : '👤';
+        const typeIcon = figuraData.Type == '2' ? '⚔️' : '🎭';
+        const typeText = figuraData.Type == '2' ? 'Armamentos' : 'Conjuntos';
+        
+        newFigura.innerHTML = `
+            <div class="symbol symbol-40px symbol-circle">
+                <span class="symbol-label fs-3 fw-bold text-primary bg-light-primary">${typeIcon}</span>
+            </div>
+            <div class="ms-5">
+                <a href="#" class="fs-5 fw-bold text-gray-900 text-hover-primary mb-2">${figuraData.Name}</a>
+                <div class="text-muted">
+                    ${sexIcon} ${typeText} • Tipo ${figuraData.Type}
+                    <br>Atk: ${figuraData.Attack || 0} • Def: ${figuraData.Defend || 0}
+                </div>
+            </div>
+        `;
+        
+        // Adicionar animação de entrada
+        newFigura.style.opacity = '0';
+        newFigura.style.transform = 'translateY(20px)';
+        
+        // Inserir no início da lista
+        parentContainer.insertBefore(newFigura, parentContainer.firstChild);
+        
+        // Animar entrada
+        setTimeout(() => {
+            newFigura.style.transition = 'all 0.5s ease';
+            newFigura.style.opacity = '1';
+            newFigura.style.transform = 'translateY(0)';
+        }, 50);
+        
+        // Atualizar arrays originais
+        const newItemData = {
+            element: newFigura.cloneNode(true),
+            id: String(figuraData.ID),
+            name: figuraData.Name,
+            sex: String(figuraData.Sex || '0'),
+            originalElement: newFigura
+        };
+        
+        originalItems.unshift(newItemData);
+        window.originalItems = originalItems;
+        
+    }
+    
+    function updateFiguraInList(figuraData) {
+        const figuraElement = document.querySelector(`[data-id="${figuraData.ID}"]`);
+        if (!figuraElement) {
+            return;
+        }
+        
+        // Atualizar dados do elemento
+        figuraElement.dataset.name = figuraData.Name;
+        figuraElement.dataset.sex = figuraData.Sex || '0';
+        figuraElement.dataset.type = figuraData.Type || '1';
+        
+        const sexIcon = figuraData.Sex == '1' ? '👦' : figuraData.Sex == '2' ? '👧' : '👤';
+        const typeIcon = figuraData.Type == '2' ? '⚔️' : '🎭';
+        const typeText = figuraData.Type == '2' ? 'Armamentos' : 'Conjuntos';
+        
+        // Atualizar conteúdo visual - buscar elementos na estrutura horizontal
+        const nameElement = figuraElement.querySelector('.fs-5, .text-gray-800, .fs-4, a');
+        const iconElement = figuraElement.querySelector('.symbol-label');
+        const detailsElement = figuraElement.querySelector('.text-muted, .text-gray-400');
+        
+        if (nameElement) {
+            nameElement.textContent = figuraData.Name;
+        }
+        
+        if (iconElement) {
+            iconElement.textContent = typeIcon;
+        }
+        
+        if (detailsElement) {
+            detailsElement.innerHTML = `${sexIcon} ${typeText} • Tipo ${figuraData.Type}<br>Atk: ${figuraData.Attack || 0} • Def: ${figuraData.Defend || 0}`;
+        }
+        
+        // Efeito visual de atualização - Pulse verde
+        figuraElement.style.transition = 'all 0.4s ease';
+        figuraElement.style.transform = 'scale(1.02)';
+        figuraElement.style.boxShadow = '0 8px 30px rgba(40,167,69,0.4)';
+        figuraElement.style.borderColor = '#28a745';
+        
+        setTimeout(() => {
+            figuraElement.style.transform = 'scale(1)';
+            figuraElement.style.boxShadow = '';
+            figuraElement.style.borderColor = '';
+        }, 400);
+        
+        // Atualizar array original
+        const itemIndex = originalItems.findIndex(item => item.id === String(figuraData.ID));
+        if (itemIndex !== -1) {
+            originalItems[itemIndex].name = figuraData.Name;
+            originalItems[itemIndex].sex = String(figuraData.Sex || '0');
+            originalItems[itemIndex].element = figuraElement.cloneNode(true);
+            window.originalItems = originalItems;
+        }
+    }
+    
+    function updateCurrentFiguraDisplay(figuraData) {
+        // Atualizar variável global
+        window.currentFugura = figuraData;
+        
+        // Atualizar campos do formulário de detalhes
+        const fieldsToUpdate = ['ID', 'Name'];
+        fieldsToUpdate.forEach(field => {
+            const input = detailsForm?.querySelector(`[name="${field}"]`);
+            if (input) input.value = figuraData[field] || '';
+        });
+        
+        // Atualizar campo Sex
+        const sexField = detailsForm?.querySelector(`[name="Sex"]`);
+        if (sexField) {
+            sexField.value = String(figuraData.Sex || '0');
+        }
+        
+        // Atualizar campo Type
+        const typeField = detailsForm?.querySelector(`[name="Type"]`);
+        if (typeField) {
+            typeField.value = String(figuraData.Type || '1');
+        }
+        
+        // Atualizar campos de atributos
+        ['Attack', 'Defend', 'Agility', 'Luck', 'Blood', 'Damage', 'Guard', 'Cost'].forEach(attr => {
+            const input = statsForm?.querySelector(`[name="${attr}"]`);
+            if (input) input.value = figuraData[attr] || 0;
+        });
+    }
+
+    // FUNÇÃO GLOBAL PARA PROCESSAR CRIAÇÃO DE FIGURA - DEFINIDA PRIMEIRO
+    window.processCreateForm = async function(formData) {
+        try {
+            // Mostrar loading/feedback visual
+            const submitBtn = document.querySelector('#createForm button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i>Criando...';
+            }
+
+            // Fazer requisição para criar a figura
+            const response = await fetch('/admin/gameutils/fugura/store', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                    // Não adicionar Content-Type para FormData
+                },
+                body: formData
+            });
+
+            const responseText = await response.text();
+            
+            // Processar resposta
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (e) {
+                result = { 
+                    success: response.ok, 
+                    message: response.ok ? 'Figura criada com sucesso' : 'Erro ao criar figura' 
+                };
+            }
+
+            if (result.success || response.ok) {
+                // Sucesso - ATUALIZAÇÃO DINÂMICA
+                if (window.showSuccessToast) {
+                    window.showSuccessToast('Figura criada com sucesso! 🎭', '✅');
+                }
+                
+                // Fechar modal
+                const createModal = document.getElementById('createModal');
+                if (createModal && window.bootstrap) {
+                    const modal = bootstrap.Modal.getInstance(createModal);
+                    if (modal) modal.hide();
+                }
+                
+                // Resetar formulário
+                const createForm = document.getElementById('createForm');
+                if (createForm) createForm.reset();
+                
+                // ADICIONAR FIGURA À LISTA DINAMICAMENTE
+                if (result.data) {
+                    addFiguraToList(result.data);
+                    
+                    // Auto-selecionar a nova figura criada
+                    setTimeout(() => {
+                        selectFugura(result.data.ID);
+                        
+                        // Scroll suave para a nova figura
+                        const newFigura = document.querySelector(`[data-id="${result.data.ID}"]`);
+                        if (newFigura) {
+                            newFigura.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    }, 500);
+                }
+                
+            } else {
+                // Erro
+                const errorMsg = result.message || result.error || 'Erro desconhecido ao criar figura';
+                if (window.showErrorToast) {
+                    window.showErrorToast(errorMsg);
+                }
+            }
+
+        } catch (error) {
+            if (window.showErrorToast) {
+                window.showErrorToast('Erro de conexão: ' + error.message);
+            }
+        } finally {
+            // Restaurar botão
+            const submitBtn = document.querySelector('#createForm button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Criar Figura';
+            }
+        }
+    };
+
     // VARIÁVEL GLOBAL COMPARTILHADA
     window.currentFugura = null;
 
@@ -16,6 +248,30 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sexoFilter) $(sexoFilter).select2('destroy');
             if (limitFilter) $(limitFilter).select2('destroy');
         } catch(e) {}
+    }
+
+    // FUNÇÃO ESPECÍFICA PARA TRANSFORMAR CAMPO SEX EM SELECT
+    function forceTransformSexField() {
+        if (!detailsForm) return;
+        
+        const sexField = detailsForm.querySelector('[name="Sex"]');
+        if (sexField && sexField.tagName !== 'SELECT') {
+            
+            const currentValue = sexField.value || '0';
+            const parent = sexField.parentNode;
+            
+            const newSelect = document.createElement('select');
+            newSelect.name = 'Sex';
+            newSelect.className = 'form-select form-select-sm form-select-solid';
+            newSelect.innerHTML = `
+                <option value="0">👤 Neutro</option>
+                <option value="1">👦 Masculino</option>
+                <option value="2">👧 Feminino</option>
+            `;
+            newSelect.value = currentValue;
+            
+            parent.replaceChild(newSelect, sexField);
+        }
     }
 
     // TRANSFORMAR CAMPOS EM DROPDOWNS VISUAIS
@@ -101,7 +357,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ===================================
     // FUNÇÃO PARA BUSCAR PRÓXIMO ID DISPONÍVEL
+    // ===================================
     function getNextAvailableId() {
         const allFuguraElements = document.querySelectorAll('.fugura-item');
         const existingIds = [];
@@ -142,18 +400,34 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function storeOriginalItems() {
         const items = document.querySelectorAll('.fugura-item');
-        parentContainer = items[0]?.parentNode;
+        
+        // Buscar o container correto
+        if (items.length > 0) {
+            const firstItem = items[0];
+            // Para layout de lista, o container é o parent direto
+            parentContainer = firstItem.parentNode;
+        }
         
         originalItems = Array.from(items).map(item => ({
             element: item.cloneNode(true),
             id: item.dataset.id || item.getAttribute('onclick')?.match(/\d+/)?.[0] || '',
-            name: item.dataset.name || item.querySelector('.text-gray-800')?.textContent?.trim() || '',
-            sex: item.dataset.sex || (item.querySelector('.text-gray-400')?.textContent?.toLowerCase().includes('masculino') ? '1' : 
-                 item.querySelector('.text-gray-400')?.textContent?.toLowerCase().includes('feminino') ? '2' : '0'),
+            name: item.dataset.name || item.querySelector('.fs-5, .text-gray-800, a')?.textContent?.trim() || '',
+            sex: item.dataset.sex || (item.querySelector('.text-muted, .text-gray-400')?.textContent?.toLowerCase().includes('masculino') ? '1' : 
+                 item.querySelector('.text-muted, .text-gray-400')?.textContent?.toLowerCase().includes('feminino') ? '2' : '0'),
             originalElement: item
         }));
         
         window.originalItems = originalItems;
+        
+        // Debug da estrutura dos cards
+        if (items.length > 0) {
+            const firstCard = items[0];
+            console.log('🔍 Estrutura do card (lista):', {
+                cardElement: firstCard.outerHTML.substring(0, 200) + '...',
+                cardClasses: firstCard.className,
+                parentClasses: parentContainer ? parentContainer.className : 'Parent não encontrado'
+            });
+        }
     }
 
     // Sistema de sessão para manter figura selecionada após reload
@@ -377,7 +651,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index < limitSelected) {
                 const newElement = itemData.element.cloneNode(true);
                 
-                newElement.style.display = 'block';
+                // Garantir que o elemento seja visível no layout de lista
+                newElement.style.display = 'flex';
                 newElement.style.visibility = 'visible';
                 newElement.style.opacity = '1';
                 newElement.style.height = 'auto';
@@ -405,7 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Tratamento de respostas AJAX para updates
+    // Tratamento de respostas AJAX para updates - VERSÃO DINÂMICA
     function handleUpdateResponse(response, successMessage, successIcon) {
         if (window.currentFugura && window.currentFugura.ID) {
             saveFiguraToSession(window.currentFugura.ID);
@@ -413,7 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (response.trim() === '' || response.length < 10) {
             showSuccessToast(successMessage, successIcon);
-            setTimeout(() => location.reload(), 500);
+            // Não precisa mais recarregar - mantém dados atuais
             return;
         }
         
@@ -429,8 +704,18 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (isSuccess) {
                 showSuccessToast(successMessage, successIcon);
-                setTimeout(() => location.reload(), 500);
-                if (json.data) window.currentFugura = json.data;
+                
+                // ATUALIZAÇÃO DINÂMICA DOS DADOS
+                if (json.data && window.currentFugura) {
+                    // Atualizar dados globais
+                    window.currentFugura = json.data;
+                    
+                    // Atualizar interface atual
+                    updateCurrentFiguraDisplay(json.data);
+                    
+                    // Atualizar figura na lista
+                    updateFiguraInList(json.data);
+                }
             } else {
                 const errorMsg = json.message || json.error || 'Erro desconhecido';
                 showErrorToast(errorMsg);
@@ -439,19 +724,26 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (parseError) {          
             if (response.includes('success') && (response.includes('true') || response.includes('atualizada'))) {
                 showSuccessToast(successMessage, successIcon);
-                setTimeout(() => location.reload(), 500);
+                // Sucesso - manter dados atuais sem reload
             } else {
                 showErrorToast('Erro de resposta do servidor');
             }
         }
     }
 
-    // Sistema principal de atualização de fuguras
+    // Sistema principal de atualização de figuras - VERSÃO DINÂMICA
     window.fugura = {
         update: function () {
             if (!window.currentFugura) {
                 showErrorToast('Nenhuma figura selecionada');
                 return;
+            }
+
+            // Feedback visual de loading
+            const figuraElement = document.querySelector(`[data-id="${window.currentFugura.ID}"]`);
+            if (figuraElement) {
+                figuraElement.style.opacity = '0.7';
+                figuraElement.style.transition = 'opacity 0.3s ease';
             }
 
             const formData = new FormData();
@@ -476,8 +768,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (window.currentFugura && window.currentFugura.ID) {
                     saveFiguraToSession(window.currentFugura.ID);
                 }
-                showSuccessToast('Dados salvos! Recarregando...', '💾');
-                setTimeout(() => location.reload(), 800);
+                showSuccessToast('Dados salvos! ✨', '💾');
+            })
+            .finally(() => {
+                // Restaurar opacidade
+                if (figuraElement) {
+                    figuraElement.style.opacity = '1';
+                }
             });
         },
 
@@ -485,6 +782,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!window.currentFugura) {
                 showErrorToast('Nenhuma figura selecionada');
                 return;
+            }
+
+            // Feedback visual de loading
+            const figuraElement = document.querySelector(`[data-id="${window.currentFugura.ID}"]`);
+            if (figuraElement) {
+                figuraElement.style.opacity = '0.7';
+                figuraElement.style.transition = 'opacity 0.3s ease';
             }
 
             const formData = new FormData();
@@ -516,13 +820,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (window.currentFugura && window.currentFugura.ID) {
                     saveFiguraToSession(window.currentFugura.ID);
                 }
-                showSuccessToast('Dados salvos! Recarregando...', '💾');
-                setTimeout(() => location.reload(), 800);
+                showSuccessToast('Dados salvos! ✨', '💾');
+            })
+            .finally(() => {
+                // Restaurar opacidade
+                if (figuraElement) {
+                    figuraElement.style.opacity = '1';
+                }
             });
         }
     };
 
+    // ===================================
     // SISTEMA DE SELEÇÃO DE FIGURAS
+    // ===================================
     window.selectFugura = function (id) {
         window.currentFugura = { ID: id };
         saveFiguraToSession(id);
@@ -591,6 +902,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (input) input.value = json.data[attr] || 0;
                 });
                 
+                // FORÇAR TRANSFORMAÇÃO DOS DROPDOWNS APÓS PREENCHER DADOS
+                setTimeout(() => {
+                    setupFormDropdowns();
+                    forceTransformSexField();
+                }, 100);
+                
+                setTimeout(() => {
+                    forceTransformSexField();
+                }, 300);
+                
                 setTimeout(() => {
                     const itemsTab = document.querySelector('a[href="#fugura_items"]');
                     
@@ -652,10 +973,17 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('button_refresh_list')?.addEventListener('click', () => {
         clearFiguraFromSession();
-        location.reload();
+        
+        // Feedback visual do refresh
+        showSuccessToast('Atualizando lista... 🔄', '♻️');
+        
+        // Reload mais suave apenas da lista
+        setTimeout(() => {
+            location.reload();
+        }, 500);
     });
 
-    // Auto-restaurar fugura após reload
+    // Auto-restaurar figura após reload (agora menos frequente)
     setTimeout(() => {
         const savedFiguraId = getFiguraFromSession();
         if (savedFiguraId) {
@@ -664,7 +992,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 figuraElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 selectFugura(savedFiguraId);
                 setTimeout(() => {
-                    showSuccessToast('Figura restaurada após atualização! 🔄', '📂');
+                    showSuccessToast('Figura restaurada! 🔄', '📂');
                 }, 1000);
             } else {
                 clearFiguraFromSession();
@@ -676,15 +1004,64 @@ document.addEventListener('DOMContentLoaded', () => {
         storeOriginalItems();
         setTimeout(aggressiveFilter, 100);
         setupFormDropdowns();
+        
+        // EXECUTAR NOVAMENTE APÓS UM DELAY PARA GARANTIR
+        setTimeout(() => {
+            setupFormDropdowns();
+            forceTransformSexField();
+        }, 500);
+        setTimeout(() => {
+            setupFormDropdowns();
+            forceTransformSexField();
+        }, 1000);
+        setTimeout(() => {
+            setupFormDropdowns();
+            forceTransformSexField();
+        }, 2000);
     }, 1000);
 
+    // ===========================================
     // TORNAR FUNÇÕES GLOBAIS PARA OUTROS SISTEMAS
+    // ===========================================
     window.showSuccessToast = showSuccessToast;
     window.showErrorToast = showErrorToast;
     window.getNextAvailableId = getNextAvailableId;
+    window.setupFormDropdowns = setupFormDropdowns;
+    window.forceTransformSexField = forceTransformSexField;
+    
+    // OBSERVADOR PARA TRANSFORMAR DROPDOWNS AUTOMATICAMENTE
+    const formObserver = new MutationObserver((mutations) => {
+        let shouldTransform = false;
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList' || mutation.type === 'attributes') {
+                // Verificar se algum campo Sex ou Type foi modificado
+                const target = mutation.target;
+                if (target && (target.name === 'Sex' || target.name === 'Type' || target.closest('[name="Sex"], [name="Type"]'))) {
+                    shouldTransform = true;
+                }
+            }
+        });
+        
+        if (shouldTransform) {
+            setTimeout(() => {
+                setupFormDropdowns();
+                forceTransformSexField();
+            }, 100);
+        }
+    });
+    
+    // Observar mudanças nos formulários
+    if (detailsForm) {
+        formObserver.observe(detailsForm, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class', 'type', 'value']
+        });
+    }
 });
 
-// CSS
+// CSS MELHORADO
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideInBounce {
@@ -723,20 +1100,20 @@ style.textContent = `
         to { transform: translateX(-100%) scale(0.8); opacity: 0; }
     }
     
-    .fugura-item {
-        transition: all 0.3s ease;
-        cursor: pointer;
+    @keyframes updatePulse {
+        0% { transform: scale(1); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        50% { transform: scale(1.02); box-shadow: 0 8px 30px rgba(40,167,69,0.4); }
+        100% { transform: scale(1); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     }
     
-    .fugura-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     
-    .fugura-item.border-primary {
-        transform: translateY(-1px);
-        box-shadow: 0 8px 30px rgba(0,123,255,0.3) !important;
-    }
+    /* ===================================
+       CARDS DAS FIGURAS - TAMANHO PADRÃO
+       ================================== */
     
     .fugura-hidden {
         display: none !important;
@@ -754,28 +1131,12 @@ style.textContent = `
         pointer-events: none !important;
     }
     
-    /* Dropdowns nos formulários com padding e altura consistentes */
-    .form-select.form-select-sm,
-    .form-select {
-        height: 38px !important;
-        padding: 6px 30px 6px 12px !important;
-        font-size: 0.875rem !important;
-        line-height: 1.5 !important;
-        border-radius: 6px !important;
-        background-position: right 8px center !important;
-        background-size: 16px 12px !important;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-        background-color: #ffffff !important;
-        border: 1px solid #e1e3ea !important;
-    }
-    
-    /* Garantir que todos os selects tenham a mesma aparência */
-    select[name="Sex"],
-    select[name="Type"],
-    select[name="sex"],
-    select[name="type"],
-    #createSex,
-    #createType {
+    /* PADRONIZAÇÃO TOTAL DOS DROPDOWNS */
+    select,
+    .form-select,
+    select.form-select,
+    select.form-control {
+        min-height: 38px !important;
         height: 38px !important;
         padding: 6px 30px 6px 12px !important;
         font-size: 0.875rem !important;
@@ -787,6 +1148,201 @@ style.textContent = `
         background-color: #ffffff !important;
         border: 1px solid #e1e3ea !important;
         cursor: pointer !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        transition: all 0.2s ease !important;
+        background-repeat: no-repeat !important;
+        color: #181c32 !important;
+        font-weight: 400 !important;
+    }
+    
+    /* Estados de interação para TODOS os selects */
+    select:hover,
+    .form-select:hover,
+    select.form-select:hover,
+    select.form-control:hover {
+        border-color: #007bff !important;
+        box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.25) !important;
+    }
+    
+    select:focus,
+    .form-select:focus,
+    select.form-select:focus,
+    select.form-control:focus {
+        border-color: #007bff !important;
+        outline: 0 !important;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+    }
+    
+    /* Garantir que os campos específicos de Sex e Type sempre sigam o padrão */
+    select[name="Sex"],
+    select[name="Type"],
+    select[name="sex"],
+    select[name="type"],
+    #createSex,
+    #createType,
+    .form-select[name="Sex"],
+    .form-select[name="Type"] {
+        height: 38px !important;
+        padding: 6px 30px 6px 12px !important;
+        font-size: 0.875rem !important;
+        line-height: 1.5 !important;
+        border-radius: 6px !important;
+        background-position: right 8px center !important;
+        background-size: 16px 12px !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-color: #ffffff !important;
+        border: 1px solid #e1e3ea !important;
+        cursor: pointer !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    /* Hover state para selects */
+    select[name="Sex"]:hover,
+    select[name="Type"]:hover,
+    select[name="sex"]:hover,
+    select[name="type"]:hover,
+    #createSex:hover,
+    #createType:hover,
+    .form-select[name="Sex"]:hover,
+    .form-select[name="Type"]:hover {
+        border-color: #007bff !important;
+        box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.25) !important;
+    }
+    
+    /* Focus state para selects */
+    select[name="Sex"]:focus,
+    select[name="Type"]:focus,
+    select[name="sex"]:focus,
+    select[name="type"]:focus,
+    #createSex:focus,
+    #createType:focus,
+    .form-select[name="Sex"]:focus,
+    .form-select[name="Type"]:focus {
+        border-color: #007bff !important;
+        outline: 0 !important;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+    }
+    
+    /* ===================================
+       CARDS DAS FIGURAS - ESTILO LISTA COMPACTA
+       ================================== */
+    
+    /* Cards das figuras - layout horizontal compacto */
+    .fugura-item {
+        display: flex !important;
+        align-items: center !important;
+        padding: 0.75rem 1rem !important;
+        margin-bottom: 0.5rem !important;
+        border: 1px solid #e1e3ea !important;
+        border-radius: 8px !important;
+        background: #ffffff !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 70px !important;
+        max-height: 80px !important;
+    }
+    
+    /* Ícone/símbolo */
+    .fugura-item .symbol {
+        width: 40px !important;
+        height: 40px !important;
+        margin-right: 1rem !important;
+        flex-shrink: 0 !important;
+    }
+    
+    /* Container do texto */
+    .fugura-item .ms-5 {
+        flex: 1 !important;
+        margin-left: 1rem !important;
+    }
+    
+    /* Nome da figura */
+    .fugura-item .fs-5 {
+        font-size: 1rem !important;
+        line-height: 1.3 !important;
+        margin-bottom: 0.25rem !important;
+        display: block !important;
+        color: #181c32 !important;
+        text-decoration: none !important;
+    }
+    
+    /* Detalhes da figura */
+    .fugura-item .text-muted {
+        font-size: 0.875rem !important;
+        line-height: 1.2 !important;
+        color: #a1a5b7 !important;
+    }
+    
+    /* Hover effect suave */
+    .fugura-item:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+        border-color: #007bff !important;
+        background-color: rgba(0, 123, 255, 0.02) !important;
+    }
+    
+    /* Estado selecionado */
+    .fugura-item.border-primary {
+        border-color: #007bff !important;
+        background-color: rgba(0, 123, 255, 0.05) !important;
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15) !important;
+    }
+    
+    .fugura-item.bg-light-primary {
+        background-color: rgba(0, 123, 255, 0.05) !important;
+    }
+    
+    /* Links dentro dos cards */
+    .fugura-item a {
+        color: inherit !important;
+        text-decoration: none !important;
+    }
+    
+    .fugura-item a:hover {
+        color: #007bff !important;
+    }
+    
+    /* Remover estilos de card que podem interferir */
+    .fugura-item.card,
+    .fugura-item.card-flush,
+    .fugura-item.h-xl-100 {
+        display: flex !important;
+        align-items: center !important;
+        height: auto !important;
+        min-height: 70px !important;
+        max-height: 80px !important;
+        flex-direction: row !important;
+        padding: 0.75rem 1rem !important;
+    }
+    
+    .fugura-item .card-body {
+        display: none !important;
+    }
+    
+    /* Layout de container para lista vertical */
+    .fugura-item + .fugura-item {
+        margin-top: 0.5rem !important;
+    }
+    
+    /* Garantir que não há conflitos com outros estilos */
+    .fugura-item * {
+        box-sizing: border-box !important;
+    }
+    
+    /* Container da lista de figuras */
+    .fugura-item:first-child {
+        margin-top: 0 !important;
+    }
+    
+    .fugura-item:last-child {
+        margin-bottom: 0 !important;
     }
     
     /* Inputs number no mesmo tamanho */
@@ -1013,7 +1569,9 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// ===========================================
 // SISTEMA DE DELETE
+// ===========================================
 document.addEventListener('DOMContentLoaded', function() {
     function showDeleteConfirmation(fuguraId, fuguraName) {
         return new Promise((resolve) => {
@@ -1183,7 +1741,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1000);
 });
 
+// ===========================================
 // SISTEMA DE CRIAÇÃO
+// ===========================================
 document.addEventListener('DOMContentLoaded', function() {
     
     function setupCreateForm() {
@@ -1311,7 +1871,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             const formData = new FormData(createForm);
-            await processCreateForm(formData);
+            await window.processCreateForm(formData);
         });
     }
     
@@ -1321,7 +1881,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1000);
 });
 
-// SISTEMA MÁXIMO 12 ITENS 
+// ===========================================
+// SISTEMA DE ITENS SIMPLIFICADO - MÁXIMO 12 ITENS
+// ===========================================
 	(function() {
 		'use strict';
 
@@ -1360,7 +1922,9 @@ document.addEventListener('DOMContentLoaded', function() {
 			}
 		}
 
+		// ===================================
 		// FUNÇÃO PARA VERIFICAR ITEM DUPLICADO
+		// ===================================
 		function isItemDuplicate(templateId) {
 			const isDuplicate = window.currentFiguraItems.some(item => {
 				const itemTemplateId = item.TemplateID || item.templateId || item.template_id;
@@ -1370,15 +1934,14 @@ document.addEventListener('DOMContentLoaded', function() {
 			return isDuplicate;
 		}
 
-		// FUNÇÃO PARA EXIBIR TODOS OS ITENS
+		// ===================================
+		// FUNÇÃO SIMPLIFICADA PARA EXIBIR TODOS OS ITENS
+		// ===================================
 		window.displayItems = function displayItems(items) {
 			const listDiv = document.getElementById('items-list');
 			if (!listDiv) {
-				console.error('❌ Elemento items-list não encontrado');
 				return;
 			}
-
-			console.log('🔄 Exibindo todos os itens:', items.length);
 
 			// FORÇA EXIBIÇÃO DA LISTA
 			listDiv.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; min-height: 400px !important;';
@@ -1410,15 +1973,12 @@ document.addEventListener('DOMContentLoaded', function() {
 						const itemElement = window.createItemCard(item);
 						itemsContainer.appendChild(itemElement);
 					} catch (error) {
-						console.error('❌ Erro ao criar card do item:', error);
 					}
 				});
 			}
 			
 			itemsContentContainer.appendChild(itemsContainer);
 			listDiv.appendChild(itemsContentContainer);
-			
-			console.log('✅ Todos os itens exibidos com sucesso');
 		};
 
 		// ===================================
@@ -1733,7 +2293,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			}
 		};
 
-		// Configurar Formulário de Adição com LIMITE DE 12 ITENS
+		// Configurar Formulário LIMITE DE 12 ITENS
 		function setupAddItemForm() {
 			const addForm = document.getElementById('form-add-item');
 			if (!addForm) {
@@ -1831,4 +2391,4 @@ document.addEventListener('DOMContentLoaded', function() {
 			setupAddItemForm();
 		}, 1500);
 
-	})();
+	})()
