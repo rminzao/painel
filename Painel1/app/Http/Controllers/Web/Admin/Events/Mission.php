@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web\Admin\Events;
 use App\Http\Controllers\Web\Controller;
 use App\Models\Events\EventRewardInfo;
 use App\Models\Events\EventRewardGoods;
+use App\Models\Events\SysUsersEventProcess;
 use App\Models\ShopGoods;
 
 class Mission extends Controller
@@ -290,10 +291,139 @@ class Mission extends Controller
         }
     }
 
-    // ============================================================
-    //  GERENCIAMENTO DE RECOMPENSAS
-    // ============================================================
+	public function resetProgress($activityType)
+	{
+		try {
+			$activityType = (int) $activityType;
+			
+			// Validação do ActivityType
+			if ($activityType < 1 || $activityType > 9) {
+				return $this->jsonResponse([
+					'success' => false,
+					'message' => 'ActivityType deve estar entre 1 e 9'
+				], 400);
+			}
 
+			// Usar o novo model para resetar
+			$result = SysUsersEventProcess::resetProgressByType($activityType);
+			
+			if (!$result['success']) {
+				return $this->jsonResponse([
+					'success' => false,
+					'message' => $result['message'],
+					'data' => [
+						'activity_type' => $activityType,
+						'records_found' => $result['records_found'],
+						'records_deleted' => $result['records_deleted'],
+						'timestamp' => date('Y-m-d H:i:s')
+					]
+				], 404);
+			}
+
+			// Nomes das missões
+			$missionTypes = [
+				1 => "Recompensas por Aumentar de nível",
+				2 => "Vitória no PvP", 
+				3 => "Consumir Cupons - Acumulado",
+				4 => "Força de combate",
+				5 => "Recarga de cupons - Acumulado",
+				6 => "Recarga de cupons - Diária",
+				7 => "Vitória Gvg",
+				8 => "Tempo Online",
+				9 => "Consumir Cupons - Diária"
+			];
+			
+			$missionTypeName = $missionTypes[$activityType] ?? "Tipo {$activityType}";
+
+			// Resposta de sucesso
+			return $this->jsonResponse([
+				'success' => true,
+				'message' => "Progresso resetado com sucesso para {$missionTypeName}!",
+				'data' => [
+					'activity_type' => $activityType,
+					'mission_type_name' => $missionTypeName,
+					'records_deleted' => $result['records_deleted'],
+					'records_found_before' => $result['records_found'],
+					'timestamp' => date('Y-m-d H:i:s'),
+					'database_used' => 'db_tank'
+				]
+			]);
+
+		} catch (\Exception $e) {
+			return $this->jsonResponse([
+				'success' => false,
+				'message' => 'Erro interno: ' . $e->getMessage(),
+				'debug' => [
+					'file' => basename($e->getFile()),
+					'line' => $e->getLine(),
+					'activity_type' => $activityType ?? 'null'
+				]
+			], 500);
+		}
+	}
+
+	/**
+	 * 🔍 FUNÇÃO PARA VERIFICAR QUANTOS REGISTROS EXISTEM POR TIPO - SIMPLIFICADA
+	 */
+	public function checkProgress()
+	{
+		try {
+			// Usar o novo model para buscar stats
+			$result = SysUsersEventProcess::getProgressStats();
+			
+			if (!$result['success']) {
+				return $this->jsonResponse([
+					'success' => false,
+					'message' => $result['message']
+				], 500);
+			}
+
+			// Adicionar nomes das missões
+			$missionTypes = [
+				1 => "Recompensas por Aumentar de nível",
+				2 => "Vitória no PvP", 
+				3 => "Consumir Cupons - Acumulado",
+				4 => "Força de combate",
+				5 => "Recarga de cupons - Acumulado",
+				6 => "Recarga de cupons - Diária",
+				7 => "Vitória Gvg",
+				8 => "Tempo Online",
+				9 => "Consumir Cupons - Diária"
+			];
+			
+			$progressData = [];
+			foreach ($result['progress_by_type'] as $row) {
+				$activityType = $row['ActiveType'];
+				$progressData[] = [
+					'activity_type' => $activityType,
+					'mission_name' => $missionTypes[$activityType] ?? "Tipo {$activityType}",
+					'total_records' => (int) $row['total_records'],
+					'unique_users' => (int) $row['unique_users']
+				];
+			}
+			
+			return $this->jsonResponse([
+				'success' => true,
+				'message' => 'Progresso verificado com sucesso',
+				'data' => [
+					'progress_by_type' => $progressData,
+					'grand_total' => $result['grand_total'],
+					'timestamp' => $result['timestamp'],
+					'database_used' => 'db_tank'
+				]
+			]);
+			
+		} catch (\Exception $e) {
+			return $this->jsonResponse([
+				'success' => false,
+				'message' => 'Erro: ' . $e->getMessage()
+			], 500);
+		}
+	}
+    /**
+     * 🔍 FUNÇÃO PARA VERIFICAR QUANTOS REGISTROS EXISTEM POR TIPO
+     */
+    /**
     /*
      *  LISTAR RECOMPENSAS DA MISSÃO
      */
@@ -417,8 +547,6 @@ class Mission extends Controller
      */
     public function testUpdateItem($activityType, $subActivityType, $templateId)
     {
-        header('Content-Type: application/json');
-        
         try {
             $activityType = (int) $activityType;
             $subActivityType = (int) $subActivityType;
@@ -461,25 +589,23 @@ class Mission extends Controller
                                       ->update($updateData);
             
             if ($updated > 0) {
-                echo json_encode([
+                return $this->jsonResponse([
                     'success' => true,
                     'message' => 'Recompensa atualizada com sucesso!',
                     'data' => ['rows_affected' => $updated]
                 ]);
             } else {
-                echo json_encode([
+                return $this->jsonResponse([
                     'success' => false,
                     'message' => 'Nenhuma linha foi atualizada.'
                 ]);
             }
-            exit;
             
         } catch (\Exception $e) {
-            echo json_encode([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Erro interno: ' . $e->getMessage()
-            ]);
-            exit;
+            ], 500);
         }
     }
 
@@ -488,8 +614,6 @@ class Mission extends Controller
      */
     public function testDeleteItem($activityType, $subActivityType, $templateId)
     {
-        header('Content-Type: application/json');
-        
         try {
             $activityType = (int) $activityType;
             $subActivityType = (int) $subActivityType;
@@ -501,31 +625,27 @@ class Mission extends Controller
                                       ->delete();
             
             if ($deleted > 0) {
-                echo json_encode([
+                return $this->jsonResponse([
                     'success' => true,
                     'message' => 'Recompensa deletada com sucesso!',
                     'data' => ['rows_affected' => $deleted]
                 ]);
             } else {
-                echo json_encode([
+                return $this->jsonResponse([
                     'success' => false,
                     'message' => 'Nenhuma linha foi deletada.'
                 ]);
             }
-            exit;
             
         } catch (\Exception $e) {
-            echo json_encode([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Erro interno: ' . $e->getMessage()
-            ]);
-            exit;
+            ], 500);
         }
     }
 
-    // ============================================================
     //  UTILITÁRIOS
-    // ============================================================
 
     /**
      *  BUSCAR ITENS NO SHOPGOODS
@@ -648,7 +768,6 @@ class Mission extends Controller
         
         return $this->getFallbackMissions();
     }
-
 
      // DADOS FALLBACK PARA TESTES
      

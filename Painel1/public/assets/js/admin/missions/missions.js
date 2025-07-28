@@ -20,6 +20,60 @@ const mission = {
         9: "Consumir Cupons - Diária",
     },
 
+    // Obter CSRF Token
+    getCsrfToken: function() {
+        const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+        const tokenInput = document.querySelector('input[name="_token"]');
+        
+        if (tokenMeta) {
+            return tokenMeta.getAttribute('content');
+        } else if (tokenInput) {
+            return tokenInput.value;
+        }
+        
+        const allMetas = document.querySelectorAll('meta');
+        for (let meta of allMetas) {
+            if (meta.getAttribute('name') === 'csrf-token' || meta.getAttribute('name') === '_token') {
+                return meta.getAttribute('content');
+            }
+        }
+        
+        return '';
+    },
+
+    // Headers padrão para requisições
+    getDefaultHeaders: function() {
+        const headers = {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        };
+        
+        const csrfToken = this.getCsrfToken();
+        if (csrfToken) {
+            headers['X-CSRF-TOKEN'] = csrfToken;
+        }
+        
+        return headers;
+    },
+
+    // Criar FormData com CSRF
+    createFormDataWithCsrf: function(formElement) {
+        let formData;
+        
+        if (formElement) {
+            formData = new FormData(formElement);
+        } else {
+            formData = new FormData();
+        }
+        
+        const csrfToken = this.getCsrfToken();
+        if (csrfToken && !formData.has('_token')) {
+            formData.append('_token', csrfToken);
+        }
+        
+        return formData;
+    },
+
     // Inicialização
     init: function() {
         this.loadMissions();
@@ -129,7 +183,6 @@ const mission = {
 
         document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-        // Event listeners
         document.getElementById('cancel-delete-btn').addEventListener('click', () => {
             this.hideSimpleDeleteModal();
         });
@@ -155,7 +208,6 @@ const mission = {
         document.getElementById('delete-modal-title').textContent = title;
         document.getElementById('delete-modal-message').innerHTML = message;
         
-        // Remover listener anterior e adicionar novo
         const confirmBtn = document.getElementById('confirm-delete-btn');
         const newConfirmBtn = confirmBtn.cloneNode(true);
         confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
@@ -318,8 +370,6 @@ const mission = {
         }, 4000);
     },
 
-    // SISTEMA DE ATUALIZAÇÃO DE CAMPOS
-
     // Função para atualizar os campos do formulário
     forceUpdateFormFields: function(missionData) {
         const targetData = {
@@ -461,9 +511,7 @@ const mission = {
         });
     },
 
-    // ATUALIZAÇÕES DINÂMICAS
-
-    // Adicionar missão
+    // Adicionar missão dinamicamente
     addMissionToList: function(missionData) {
         this.state.missions.unshift(missionData);
         this.state.filteredMissions = this.state.missions.slice();
@@ -481,7 +529,7 @@ const mission = {
         this.showNotification('Missão adicionada com sucesso! 🚀', 'success');
     },
 
-    // Atualizar missão na lista
+    // Atualizar missão na lista dinamicamente
     updateMissionInList: function(missionData) {
         const missionIndex = this.state.missions.findIndex(m => 
             m.ActivityType === missionData.ActivityType && m.SubActivityType === missionData.SubActivityType
@@ -541,7 +589,7 @@ const mission = {
         }
     },
 
-    // Remover missão da lista
+    // Remover missão da lista dinamicamente
     removeMissionFromList: function(activityType, subActivityType) {
         this.state.missions = this.state.missions.filter(m => 
             !(m.ActivityType === activityType && m.SubActivityType === subActivityType)
@@ -564,43 +612,51 @@ const mission = {
     renderSingleMissionItem: function(mission) {
         const missionName = this.getMissionName(mission.ActivityType, mission.SubActivityType);
         
-        return `<div class="mission-item" onclick="mission.selectMission(${mission.ActivityType}, ${mission.SubActivityType})" data-activity="${mission.ActivityType}" data-sub="${mission.SubActivityType}">
-            <div class="mission-content">
-                <div class="mission-header">
-                    <div class="mission-title">${missionName}</div>
-                    <button class="mission-delete-btn" onclick="event.stopPropagation(); mission.confirmDelete(${mission.ActivityType}, ${mission.SubActivityType})" title="Excluir missão">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-                <div class="mission-meta">
-                    <div class="mission-badge">Type ${mission.ActivityType}</div>
-                    <div class="mission-condition">Condition: ${mission.Condition}</div>
+        return `
+            <div class="mission-item" onclick="mission.selectMission(${mission.ActivityType}, ${mission.SubActivityType})" data-activity="${mission.ActivityType}" data-sub="${mission.SubActivityType}">
+                <div class="mission-content">
+                    <div class="mission-header">
+                        <div class="mission-title">${missionName}</div>
+                        <div class="mission-actions">
+                            <button class="mission-reset-btn" onclick="event.stopPropagation(); mission.confirmResetProgress(${mission.ActivityType})" title="Resetar Progresso dos Players">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                            <button class="mission-delete-btn" onclick="event.stopPropagation(); mission.confirmDelete(${mission.ActivityType}, ${mission.SubActivityType})" title="Excluir missão">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mission-meta">
+                        <div class="mission-badge">Type ${mission.ActivityType}</div>
+                        <div class="mission-condition">Condition: ${mission.Condition}</div>
+                    </div>
                 </div>
             </div>
-        </div>`;
+        `;
     },
 
-    // FUNÇÕES PRINCIPAIS
     // Carregar missões
     loadMissions: function() {
         const self = this;
         
-        fetch('/admin/game/event/missions/data')
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(data) {
-                if (data.success) {
-                    self.state.missions = data.data.missions || [];
-                    self.state.filteredMissions = self.state.missions.slice();
-                    self.applyFilters();
-                    $('#not_results').hide();
-                }
-            })
-            .catch(function(error) {
-                console.error('Erro ao carregar missões:', error);
-                self.showNotification('Erro ao carregar missões: ' + error.message, 'error');
-            });
+        fetch('/admin/game/event/missions/data', {
+            method: 'GET',
+            headers: this.getDefaultHeaders()
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.success) {
+                self.state.missions = data.data.missions || [];
+                self.state.filteredMissions = self.state.missions.slice();
+                self.applyFilters();
+                $('#not_results').hide();
+            }
+        })
+        .catch(function(error) {
+            self.showNotification('Erro ao carregar missões: ' + error.message, 'error');
+        });
     },
 
     // Renderizar lista de missões
@@ -646,24 +702,26 @@ const mission = {
             .addClass('active')
             .attr('data-selected', 'true');
 
-        fetch('/admin/game/event/missions/show/' + activityType + '/' + subActivityType)
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(data) {
-                if (data.success) {
-                    self.state.currentMission = data.data.mission;
-                    self.renderMissionDetails();
-                    self.loadMissionRewards(activityType, subActivityType);
-                    
-                    $('#not_selected').hide();
-                    $('#mission_data').show();
-                }
-            })
-            .catch(function(error) {
-                console.error('Erro ao selecionar missão:', error);
-                self.showNotification('Erro ao carregar missão', 'error');
-            });
+        fetch('/admin/game/event/missions/show/' + activityType + '/' + subActivityType, {
+            method: 'GET',
+            headers: this.getDefaultHeaders()
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.success) {
+                self.state.currentMission = data.data.mission;
+                self.renderMissionDetails();
+                self.loadMissionRewards(activityType, subActivityType);
+                
+                $('#not_selected').hide();
+                $('#mission_data').show();
+            }
+        })
+        .catch(function(error) {
+            self.showNotification('Erro ao carregar missão', 'error');
+        });
     },
 
     // Renderizar detalhes da missão
@@ -679,20 +737,22 @@ const mission = {
     loadMissionRewards: function(activityType, subActivityType) {
         const self = this;
         
-        fetch('/admin/game/event/missions/' + activityType + '/' + subActivityType + '/items')
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(data) {
-                if (data.success) {
-                    self.state.currentRewards = data.data.rewards || [];
-                    self.renderRewardsList(data.data.rewards || []);
-                }
-            })
-            .catch(function(error) {
-                console.error('Erro ao carregar recompensas:', error);
-                self.renderRewardsList([]);
-            });
+        fetch('/admin/game/event/missions/' + activityType + '/' + subActivityType + '/items', {
+            method: 'GET',
+            headers: this.getDefaultHeaders()
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.success) {
+                self.state.currentRewards = data.data.rewards || [];
+                self.renderRewardsList(data.data.rewards || []);
+            }
+        })
+        .catch(function(error) {
+            self.renderRewardsList([]);
+        });
     },
 
     // Renderizar recompensas
@@ -761,10 +821,11 @@ const mission = {
     create: function() {
         const self = this;
         const form = document.getElementById('form_mission_create');
-        const formData = new FormData(form);
+        const formData = this.createFormDataWithCsrf(form);
 
         fetch('/admin/game/event/missions/store', {
             method: 'POST',
+            headers: this.getDefaultHeaders(),
             body: formData
         })
         .then(function(response) {
@@ -786,7 +847,6 @@ const mission = {
             }
         })
         .catch(function(error) {
-            console.error('Erro ao criar missão:', error);
             self.showNotification('Erro ao criar missão', 'error');
         });
     },
@@ -801,10 +861,11 @@ const mission = {
         }
 
         const form = document.getElementById('form-mission-edit-send');
-        const formData = new FormData(form);
+        const formData = this.createFormDataWithCsrf(form);
 
         fetch('/admin/game/event/missions/' + this.state.currentMission.ActivityType + '/' + this.state.currentMission.SubActivityType + '/update', {
             method: 'POST',
+            headers: this.getDefaultHeaders(),
             body: formData
         })
         .then(function(response) {
@@ -824,7 +885,6 @@ const mission = {
             }
         })
         .catch(function(error) {
-            console.error('Erro ao atualizar missão:', error);
             self.showNotification('Erro ao atualizar missão', 'error');
         });
     },
@@ -847,7 +907,8 @@ const mission = {
         const self = this;
         
         fetch('/admin/game/event/missions/' + activityType + '/' + subActivityType + '/delete', {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: this.getDefaultHeaders()
         })
         .then(function(response) {
             return response.json();
@@ -861,7 +922,6 @@ const mission = {
             }
         })
         .catch(function(error) {
-            console.error('Erro ao excluir missão:', error);
             self.showNotification('Erro ao excluir missão', 'error');
         });
     },
@@ -939,10 +999,122 @@ const mission = {
         setTimeout(() => {
             this.loadMissions();
         }, 500);
+    },
+
+    // Confirmar reset de progresso
+    confirmResetProgress: function(activityType) {
+        const self = this;
+        const missionTypeName = this.missionNames[activityType] || `Tipo ${activityType}`;
+        
+        this.showSimpleDeleteModal(
+            '🔄 Resetar Progresso',
+            `Tem certeza que deseja resetar o progresso de <strong>TODOS os players</strong> para:<br><br><strong>"${missionTypeName}"</strong>?<br><br>⚠️ Esta ação irá deletar todos os registros da tabela <code>Sys_Users_EventProcess</code> onde <code>ActivityType = ${activityType}</code>`,
+            () => {
+                self.resetProgress(activityType);
+            }
+        );
+    },
+
+    // Executar reset de progresso
+    resetProgress: function(activityType) {
+        const self = this;
+        
+        if (!activityType || activityType === undefined || activityType === null) {
+            self.showNotification('ActivityType inválido', 'error');
+            return;
+        }
+        
+        self.showNotification('Processando reset de progresso...', 'info');
+        
+        const formData = this.createFormDataWithCsrf();
+        formData.append('activity_type', activityType);
+        
+        fetch(`/admin/game/event/missions/${activityType}/reset-progress`, {
+            method: 'POST',
+            headers: this.getDefaultHeaders(),
+            body: formData
+        })
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            if (data && data.success) {
+                const recordsDeleted = data.data?.records_deleted || 0;
+                const missionTypeName = data.data?.mission_type_name || self.missionNames[activityType] || `Tipo ${activityType}`;
+                
+                self.showNotification(
+                    `✅ Progresso resetado com sucesso!<br>
+                    📊 ${recordsDeleted} registro(s) removido(s)<br>`, 
+                    'success'
+                );
+            } else {
+                const errorMessage = data?.message || 'Erro desconhecido ao resetar progresso';
+                self.showNotification('❌ Erro: ' + errorMessage, 'error');
+            }
+        })
+        .catch(function(error) {
+            let errorMessage = 'Erro ao conectar com o servidor';
+            
+            if (error.message.includes('HTTP Error: 500')) {
+                errorMessage = 'Erro interno do servidor - verifique os logs';
+            } else if (error.message.includes('HTTP Error: 404')) {
+                errorMessage = 'Rota não encontrada - verifique a URL';
+            } else if (error.message.includes('HTTP Error: 403')) {
+                errorMessage = 'Acesso negado - verifique permissões';
+            } else if (error.message.includes('HTTP Error: 422')) {
+                errorMessage = 'Dados inválidos enviados';
+            } else if (error.message.includes('Failed to fetch')) {
+                errorMessage = 'Erro de conexão com o servidor';
+            }
+            
+            self.showNotification('❌ ' + errorMessage, 'error');
+        });
+    },
+
+    // Verificar progresso atual
+    checkProgress: function() {
+        const self = this;
+        
+        self.showNotification('Verificando progresso atual...', 'info');
+        
+        fetch('/admin/game/event/missions/check-progress', {
+            method: 'GET',
+            headers: this.getDefaultHeaders()
+        })
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            if (data && data.success) {
+                let message = '📊 <strong>Progresso Atual:</strong><br>';
+                
+                if (data.data.progress_by_type && data.data.progress_by_type.length > 0) {
+                    data.data.progress_by_type.forEach(function(progress) {
+                        message += `• ${progress.mission_name}: ${progress.total_records} registros (${progress.unique_users} usuários)<br>`;
+                    });
+                    message += `<br><strong>Total Geral:</strong> ${data.data.grand_total} registros`;
+                } else {
+                    message += 'Nenhum progresso encontrado no banco.';
+                }
+                
+                self.showNotification(message, 'info');
+            } else {
+                self.showNotification('❌ Erro: ' + (data?.message || 'Erro ao verificar progresso'), 'error');
+            }
+        })
+        .catch(function(error) {
+            self.showNotification('❌ Erro ao verificar progresso: ' + error.message, 'error');
+        });
     }
 };
 
-// GERENCIADOR DE RECOMPENSAS COM MODAL SIMPLES
+// GERENCIADOR DE RECOMPENSAS
 const missionReward = {
     // Confirmar exclusão com modal simples
     confirmDelete: function(templateId) {
@@ -984,11 +1156,12 @@ const missionReward = {
         }
 
         const form = document.getElementById('form-mission-reward-send');
-        const formData = new FormData(form);
+        const formData = mission.createFormDataWithCsrf(form);
         formData.append('template_id', mission.state.selectedItem.templateId);
 
         fetch('/admin/game/event/missions/' + mission.state.currentMission.ActivityType + '/' + mission.state.currentMission.SubActivityType + '/items', {
             method: 'POST',
+            headers: mission.getDefaultHeaders(),
             body: formData
         })
         .then(function(response) {
@@ -1011,7 +1184,6 @@ const missionReward = {
             }
         })
         .catch(function(error) {
-            console.error('Erro ao criar recompensa:', error);
             mission.showNotification('Erro ao adicionar recompensa', 'error');
         });
     },
@@ -1032,48 +1204,50 @@ const missionReward = {
             return;
         }
 
-        fetch('/admin/game/event/missions/items/info?template_id=' + templateId)
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(data) {
-                if (!data.success) {
-                    mission.showNotification('Erro ao carregar dados do item', 'error');
-                    return;
-                }
+        fetch('/admin/game/event/missions/items/info?template_id=' + templateId, {
+            method: 'GET',
+            headers: mission.getDefaultHeaders()
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (!data.success) {
+                mission.showNotification('Erro ao carregar dados do item', 'error');
+                return;
+            }
 
-                const shopItemData = data.data;
+            const shopItemData = data.data;
 
-                $('#md-edit-reward-pic').attr('src', shopItemData.Icon);
-                $('#md-edit-reward-name').text(shopItemData.Name);
-                $('#md-edit-reward-id').text('ID: ' + shopItemData.TemplateID);
-                
-                const form = document.getElementById('form-mission-reward-edit-send');
-                
-                let hiddenField = form.querySelector('input[name="template_id"]');
-                if (!hiddenField) {
-                    hiddenField = document.createElement('input');
-                    hiddenField.type = 'hidden';
-                    hiddenField.name = 'template_id';
-                    form.appendChild(hiddenField);
-                }
-                hiddenField.value = templateId;
-                
-                form.querySelector('input[name="count"]').value = currentReward.Count || 1;
-                form.querySelector('input[name="validity"]').value = currentReward.ValidDate || 0;
-                form.querySelector('input[name="strength_level"]').value = currentReward.StrengthLevel || 0;
-                form.querySelector('input[name="attack_compose"]').value = currentReward.AttackCompose || 0;
-                form.querySelector('input[name="defend_compose"]').value = currentReward.DefendCompose || 0;
-                form.querySelector('input[name="luck_compose"]').value = currentReward.LuckCompose || 0;
-                form.querySelector('input[name="agility_compose"]').value = currentReward.AgilityCompose || 0;
-                form.querySelector('input[name="is_bind"]').checked = (currentReward.IsBind == 1);
-                
-                $('#md_mission_edit_item').modal('show');
-            })
-            .catch(function(error) {
-                console.error('Erro ao carregar recompensa:', error);
-                mission.showNotification('Erro ao carregar recompensa', 'error');
-            });
+            $('#md-edit-reward-pic').attr('src', shopItemData.Icon);
+            $('#md-edit-reward-name').text(shopItemData.Name);
+            $('#md-edit-reward-id').text('ID: ' + shopItemData.TemplateID);
+            
+            const form = document.getElementById('form-mission-reward-edit-send');
+            
+            let hiddenField = form.querySelector('input[name="template_id"]');
+            if (!hiddenField) {
+                hiddenField = document.createElement('input');
+                hiddenField.type = 'hidden';
+                hiddenField.name = 'template_id';
+                form.appendChild(hiddenField);
+            }
+            hiddenField.value = templateId;
+            
+            form.querySelector('input[name="count"]').value = currentReward.Count || 1;
+            form.querySelector('input[name="validity"]').value = currentReward.ValidDate || 0;
+            form.querySelector('input[name="strength_level"]').value = currentReward.StrengthLevel || 0;
+            form.querySelector('input[name="attack_compose"]').value = currentReward.AttackCompose || 0;
+            form.querySelector('input[name="defend_compose"]').value = currentReward.DefendCompose || 0;
+            form.querySelector('input[name="luck_compose"]').value = currentReward.LuckCompose || 0;
+            form.querySelector('input[name="agility_compose"]').value = currentReward.AgilityCompose || 0;
+            form.querySelector('input[name="is_bind"]').checked = (currentReward.IsBind == 1);
+            
+            $('#md_mission_edit_item').modal('show');
+        })
+        .catch(function(error) {
+            mission.showNotification('Erro ao carregar recompensa', 'error');
+        });
     },
 
     // Atualizar recompensa
@@ -1091,10 +1265,11 @@ const missionReward = {
             return;
         }
         
-        const formData = new FormData(form);
+        const formData = mission.createFormDataWithCsrf(form);
 
         fetch('/test/update-item/' + mission.state.currentMission.ActivityType + '/' + mission.state.currentMission.SubActivityType + '/' + templateId, {
             method: 'POST',
+            headers: mission.getDefaultHeaders(),
             body: formData
         })
         .then(function(response) {
@@ -1114,7 +1289,6 @@ const missionReward = {
             }
         })
         .catch(function(error) {
-            console.error('Erro ao atualizar:', error);
             mission.showNotification('Erro ao atualizar recompensa', 'error');
         });
     },
@@ -1127,7 +1301,8 @@ const missionReward = {
         }
 
         fetch('/test/delete-item/' + mission.state.currentMission.ActivityType + '/' + mission.state.currentMission.SubActivityType + '/' + templateId, {
-            method: 'POST'
+            method: 'POST',
+            headers: mission.getDefaultHeaders()
         })
         .then(function(response) {
             return response.json();
@@ -1145,7 +1320,6 @@ const missionReward = {
             }
         })
         .catch(function(error) {
-            console.error('Erro ao deletar:', error);
             mission.showNotification('Erro ao excluir recompensa', 'error');
         });
     },
@@ -1164,7 +1338,8 @@ const missionReward = {
         rewards.forEach(function(reward) {
             const templateId = reward.TemplateId || reward.TemplateID;
             const promise = fetch('/test/delete-item/' + mission.state.currentMission.ActivityType + '/' + mission.state.currentMission.SubActivityType + '/' + templateId, {
-                method: 'POST'
+                method: 'POST',
+                headers: mission.getDefaultHeaders()
             })
             .then(function(response) {
                 return response.json();
@@ -1189,7 +1364,6 @@ const missionReward = {
                 mission.showNotification('Nenhuma recompensa foi excluída', 'warning');
             }
         }).catch(function(error) {
-            console.error('Erro ao deletar todas:', error);
             mission.showNotification('Erro ao excluir recompensas', 'error');
         });
     }
@@ -1275,6 +1449,6 @@ $(document).ready(function() {
     });
 });
 
-// FUNÇÕES GLOBAIS
+// FUNÇÕES GLOBAIS PARA COMPATIBILIDADE
 window.mission = mission;
 window.missionReward = missionReward;

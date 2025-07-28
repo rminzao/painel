@@ -289,6 +289,36 @@
             margin: 0;
         }
 
+        /* 🔄 NOVOS ESTILOS PARA BOTÕES DE AÇÃO */
+        .mission-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .mission-reset-btn {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            color: #0284c7;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            opacity: 0.7;
+            flex-shrink: 0;
+        }
+
+        .mission-reset-btn:hover {
+            background: #e0f2fe;
+            border-color: #7dd3fc;
+            color: #0369a1;
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
         .mission-delete-btn {
             background: #fef2f2;
             border: 1px solid #fecaca;
@@ -345,85 +375,6 @@
             padding: 8px 0;
             border-bottom: 1px solid #e5e7eb;
             margin-bottom: 8px;
-        }================================================ */
-        .mission-item {
-            cursor: pointer;
-            margin: 8px 0;
-            border-radius: 10px;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid #e5e7eb;
-            background: #ffffff;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .mission-item:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .mission-item.active {
-            border-color: #3b82f6;
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
-        }
-
-        .mission-content {
-            padding: 16px;
-        }
-
-        .mission-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .mission-badge {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-        }
-
-        .mission-delete-btn {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            opacity: 0.7;
-        }
-
-        .mission-delete-btn:hover {
-            background: #fee2e2;
-            border-color: #f87171;
-            color: #b91c1c;
-            opacity: 1;
-            transform: scale(1.05);
-        }
-
-        .mission-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 4px;
-        }
-
-        .mission-condition {
-            font-size: 12px;
-            color: #6b7280;
-            font-weight: 500;
         }
 
         /* ============================================================ */
@@ -617,6 +568,16 @@
             .btn-sm {
                 font-size: 12px;
                 padding: 5px 10px;
+            }
+            
+            .mission-actions {
+                gap: 2px;
+            }
+            
+            .mission-reset-btn,
+            .mission-delete-btn {
+                width: 24px;
+                height: 24px;
             }
         }
 
