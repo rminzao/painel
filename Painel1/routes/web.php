@@ -213,7 +213,8 @@ $router->get('/admin/ecommerce/invoice/create', [
   fn () => new Response(200, (new Admin\Invoice())->create())
 ]);
 
-#region Fugura System
+#region Fugura System 
+// by rm
 $router->get('/admin/gameutils/fugura', [
     'middleware' => ['require-admin-view'],
     fn () => new Response(200, (new FuguraController())->index())
@@ -359,8 +360,8 @@ $router->post('/admin/game/npc', [
 ]);
 #endregion
 
-// ROTAS MISSIONS - by rm
-
+#region Missions System
+//  by rm
 $router->get('/admin/game/event/missions', [
     'middleware' => ['require-admin-view'],
     fn () => new Response(200, (new \App\Http\Controllers\Web\Admin\Events\Mission())->index())
@@ -451,7 +452,53 @@ $router->get('/admin/game/event/missions/check-progress', [
     fn () => (new \App\Http\Controllers\Web\Admin\Events\Mission())->checkProgress()
 ]);
 
-#Fim rota das missions - amém
+// Fim rota das missions - amém
+#endregion
+
+#region War Pass System - by rmdev
+
+// Pg initial
+$router->get('/admin/game/warpass', [
+    'middleware' => ['require-admin-view'],
+    fn () => new Response(200, (new \App\Http\Controllers\Web\Admin\Warpass\WarpassController())->index())
+]);
+
+// API niveis
+$router->get('/admin/game/warpass/data', [
+    'middleware' => ['require-admin-view'],
+    fn () => (new \App\Http\Controllers\Web\Admin\Warpass\WarpassController())->getData()
+]);
+
+$router->get('/admin/game/warpass/show/{level}', [
+    'middleware' => ['require-admin-view'],
+    fn ($level) => (new \App\Http\Controllers\Web\Admin\Warpass\WarpassController())->show($level)
+]);
+
+$router->post('/admin/game/warpass/store', [
+    'middleware' => ['require-admin-view'],
+    fn () => (new \App\Http\Controllers\Web\Admin\Warpass\WarpassController())->store()
+]);
+
+$router->post('/admin/game/warpass/update/{level}', [
+    'middleware' => ['require-admin-view'],
+    fn ($level) => (new \App\Http\Controllers\Web\Admin\Warpass\WarpassController())->update($level)
+]);
+
+$router->post('/admin/game/warpass/delete/{level}', [
+    'middleware' => ['require-admin-view'],
+    fn ($level) => (new \App\Http\Controllers\Web\Admin\Warpass\WarpassController())->destroy($level)
+]);
+
+$router->get('/admin/game/warpass/items/search', [
+    'middleware' => ['require-admin-view'],
+    fn () => (new \App\Http\Controllers\Web\Admin\Warpass\WarpassController())->searchItems()
+]);
+
+$router->get('/admin/game/warpass/items/info', [
+    'middleware' => ['require-admin-view'],
+    fn () => (new \App\Http\Controllers\Web\Admin\Warpass\WarpassController())->getItemInfo()
+]);
+#endregion
 
 $router->get('/admin/game/map', [
   'middleware' => [
@@ -535,4 +582,3 @@ $router->get('/admin/blog/criar', [
   ],
   fn () => new Response(200, (new Admin\Blog())->create())
 ]);
-

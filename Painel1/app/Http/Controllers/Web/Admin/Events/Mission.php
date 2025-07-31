@@ -363,7 +363,7 @@ class Mission extends Controller
 	}
 
 	/**
-	 * 🔍 FUNÇÃO PARA VERIFICAR QUANTOS REGISTROS EXISTEM POR TIPO - SIMPLIFICADA
+	 * FUNÇÃO PARA VERIFICAR QUANTOS REGISTROS EXISTEM POR TIPO - SIMPLIFICADA
 	 */
 	public function checkProgress()
 	{
@@ -421,10 +421,9 @@ class Mission extends Controller
 		}
 	}
     /**
-     * 🔍 FUNÇÃO PARA VERIFICAR QUANTOS REGISTROS EXISTEM POR TIPO
+     * FUNÇÃO PARA VERIFICAR QUANTOS REGISTROS EXISTEM POR TIPO
      */
     /**
-    /*
      *  LISTAR RECOMPENSAS DA MISSÃO
      */
     public function getItems($activityType, $subActivityType)

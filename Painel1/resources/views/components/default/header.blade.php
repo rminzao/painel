@@ -186,6 +186,24 @@
                                                 </a>
                                             </div>
                                             <div class="menu-item">
+                                                <a class="menu-link py-3" href="{{ url('admin/game/warpass') }}">
+                                                    <span class="menu-icon">
+                                                        <span class="svg-icon svg-icon-2">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                height="24" viewBox="0 0 24 24" fill="none">
+                                                                <path opacity="0.3"
+                                                                    d="M2 8.4L12 4L22 8.4V15.6L12 20L2 15.6V8.4Z"
+                                                                    fill="currentColor" />
+                                                                <path
+                                                                    d="M11 2.7V1C11 0.4 11.4 0 12 0C12.6 0 13 0.4 13 1V2.7L22.7 7.1C23.1 7.3 23.3 7.7 23.3 8.1V15.9C23.3 16.3 23.1 16.7 22.7 16.9L13 21.3V23C13 23.6 12.6 24 12 24C11.4 24 11 23.6 11 23V21.3L1.3 16.9C0.9 16.7 0.7 16.3 0.7 15.9V8.1C0.7 7.7 0.9 7.3 1.3 7.1L11 2.7ZM10.5 8.8L5.7 11.2L12 14.7L18.3 11.2L13.5 8.8V4.3L10.5 2.8V8.8Z"
+                                                                    fill="currentColor" />
+                                                            </svg>
+                                                        </span>
+                                                    </span>
+                                                    <span class="menu-title">Warpass</span>
+                                                </a>
+                                            </div>
+                                            <div class="menu-item">
                                                 <a class="menu-link py-3" href="{{ url('admin/game/quest') }}">
                                                     <span class="menu-icon">
                                                         <span class="svg-icon svg-icon-2">
