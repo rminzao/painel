@@ -1934,13 +1934,14 @@ $router->delete('/api/admin/game/event/activity-quest/reward', [
   fn ($request) => new Response(200, (new Admin\Game\Event\ActivityQuestReward())->delete($request), 'application/json')
 ]);
 
+#region PVE System
 $router->get('/api/admin/game/pve', [
   'middleware' => [
     'api',
     'jwt-auth',
     'admin',
   ],
-  fn ($request) => new Response(200, (new Admin\Game\Pve())->list($request), 'application/json')
+  fn () => new Response(200, (new Admin\Game\Pve())->list(), 'application/json')
 ]);
 
 $router->post('/api/admin/game/pve', [
@@ -1949,7 +1950,7 @@ $router->post('/api/admin/game/pve', [
     'jwt-auth',
     'admin',
   ],
-  fn ($request) => new Response(200, (new Admin\Game\Pve())->create($request), 'application/json')
+  fn () => new Response(200, (new Admin\Game\Pve())->create(), 'application/json')
 ]);
 
 $router->put('/api/admin/game/pve', [
@@ -1958,7 +1959,7 @@ $router->put('/api/admin/game/pve', [
     'jwt-auth',
     'admin',
   ],
-  fn ($request) => new Response(200, (new Admin\Game\Pve())->update($request), 'application/json')
+  fn () => new Response(200, (new Admin\Game\Pve())->update(), 'application/json')
 ]);
 
 $router->delete('/api/admin/game/pve', [
@@ -1967,8 +1968,81 @@ $router->delete('/api/admin/game/pve', [
     'jwt-auth',
     'admin',
   ],
-  fn ($request) => new Response(200, (new Admin\Game\Pve())->delete($request), 'application/json')
+  fn () => new Response(200, (new Admin\Game\Pve())->delete(), 'application/json')
 ]);
+
+$router->get('/api/admin/game/pve/suggested-id', [
+  'middleware' => [
+    'api',
+    'jwt-auth',
+    'admin',
+  ],
+  fn () => new Response(200, (new Admin\Game\Pve())->getSuggestedId(), 'application/json')
+]);
+
+$router->get('/api/admin/game/pve/available-items', [
+  'middleware' => [
+    'api',
+    'jwt-auth',
+    'admin',
+  ],
+  fn () => new Response(200, (new Admin\Game\Pve())->getAvailableItems(), 'application/json')
+]);
+
+$router->post('/api/admin/game/pve/update-ordering', [
+  'middleware' => [
+    'api',
+    'jwt-auth',
+    'admin',
+  ],
+  fn () => new Response(200, (new Admin\Game\Pve())->updateOrdering(), 'application/json')
+]);
+
+$router->get('/api/admin/game/pve/types', [
+  'middleware' => [
+    'api',
+    'jwt-auth',
+    'admin',
+  ],
+  fn () => new Response(200, (new Admin\Game\Pve())->getTypes(), 'application/json')
+]);
+
+$router->get('/api/admin/game/pve/update-on-game', [
+  'middleware' => [
+    'api',
+    'jwt-auth',
+    'admin',
+  ],
+  fn () => new Response(200, (new Admin\Game\Pve())->updateOnGame(), 'application/json')
+]);
+
+$router->post('/api/admin/game/pve/import', [
+  'middleware' => [
+    'api',
+    'jwt-auth',
+    'admin',
+  ],
+  fn () => new Response(200, (new Admin\Game\Pve())->import(), 'application/json')
+]);
+
+$router->get('/api/admin/game/pve/export', [
+  'middleware' => [
+    'api',
+    'jwt-auth',
+    'admin',
+  ],
+  fn () => new Response(200, (new Admin\Game\Pve())->export(), 'application/json')
+]);
+
+$router->post('/api/admin/game/pve/duplicate', [
+  'middleware' => [
+    'api',
+    'jwt-auth',
+    'admin',
+  ],
+  fn () => new Response(200, (new Admin\Game\Pve())->duplicate(), 'application/json')
+]);
+#endregion
 
 $router->post('/api/admin/blog', [
   'middleware' => [

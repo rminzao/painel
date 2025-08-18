@@ -299,12 +299,15 @@ $router->get('/admin/users/{id}', [
   fn ($id) => new Response(200, (new Admin\User())->detail($id))
 ], 'admin.users.detail');
 
+#region Drop System
 $router->get('/admin/game/drop', [
   'middleware' => [
     'require-admin-view'
   ],
   fn () => new Response(200, (new Admin\Drop())->index())
 ]);
+#endregion
+
 $router->get('/admin/game/item', [
   'middleware' => [
     'require-admin-view'
@@ -357,6 +360,15 @@ $router->get('/admin/game/npc/calculate', [
 $router->post('/admin/game/npc', [
     'middleware' => ['require-admin-view'],
     fn () => (new Admin\Game\Npc())->store()
+]);
+#endregion
+
+#region PVE System
+$router->get('/admin/game/pve', [
+  'middleware' => [
+    'require-admin-view'
+  ],
+  fn () => new Response(200, (new Admin\Game\Pve())->index())
 ]);
 #endregion
 
@@ -567,13 +579,6 @@ $router->get('/admin/game/announcements', [
     'require-admin-view'
   ],
   fn ($id) => new Response(200, (new Admin\Game\Announcements())->index($id))
-]);
-
-$router->get('/admin/game/pve', [
-  'middleware' => [
-    'require-admin-view'
-  ],
-  fn ($id) => new Response(200, (new Admin\Game\Pve())->index($id))
 ]);
 
 $router->get('/admin/blog/criar', [
