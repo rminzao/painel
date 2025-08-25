@@ -349,6 +349,62 @@ $router->delete('/api/admin/server', [
 ]);
 #endregion
 
+#region emulator manager - BY rmdev
+$router->post('/api/admin/emulators/reload-xml', [
+  'middleware' => [
+    'api',
+    'jwt-auth',
+    'admin',
+  ],
+  fn ($request) => new Response(200, (new App\Http\Controllers\Api\Admin\EmulatorController())->reloadXml($request), 'application/json')
+]);
+
+$router->get('/api/admin/emulators/status', [
+  'middleware' => [
+    'api',
+    'jwt-auth',
+    'admin',
+  ],
+  fn ($request) => new Response(200, (new App\Http\Controllers\Api\Admin\EmulatorController())->status($request), 'application/json')
+]);
+
+$router->post('/api/admin/emulators/start', [
+  'middleware' => [
+    'api',
+    'jwt-auth',
+    'admin',
+  ],
+  fn ($request) => new Response(200, (new App\Http\Controllers\Api\Admin\EmulatorController())->start($request), 'application/json')
+]);
+
+$router->post('/api/admin/emulators/stop', [
+  'middleware' => [
+    'api',
+    'jwt-auth',
+    'admin',
+  ],
+  fn ($request) => new Response(200, (new App\Http\Controllers\Api\Admin\EmulatorController())->stop($request), 'application/json')
+]);
+
+$router->post('/api/admin/emulators/restart', [
+  'middleware' => [
+    'api',
+    'jwt-auth',
+    'admin',
+  ],
+  fn ($request) => new Response(200, (new App\Http\Controllers\Api\Admin\EmulatorController())->restart($request), 'application/json')
+]);
+
+$router->get('/api/admin/emulators/ping', [
+  'middleware' => [
+    'api',
+    'jwt-auth',
+    'admin',
+  ],
+  fn ($request) => new Response(200, (new App\Http\Controllers\Api\Admin\EmulatorController())->ping($request), 'application/json')
+]);
+#endregion
+
 #region Product
 $router->get('/api/admin/product', [
   'middleware' => [

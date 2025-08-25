@@ -13,8 +13,6 @@ class SuitEquip extends Api
     public function list(Request $request): array
     {
         $post = $request->get();
-
-        //filter and valid page request
         $sid = $post['sid'] ?? null;
         $id = $post['id'] ?? null;
 
@@ -36,7 +34,6 @@ class SuitEquip extends Api
             $equipments = explode(',', $item['ContainEquip']);
             foreach ($equipments as $id) {
 
-                //find item data
                 $modelGoods = (new ShopGoods())->setTable($server->dbData . '.dbo.Shop_Goods');
                 $goods = $modelGoods->select('TemplateID', 'Name', 'NeedSex')->where('TemplateID', intval($id))->first()?->toArray();
                 if(!$goods){

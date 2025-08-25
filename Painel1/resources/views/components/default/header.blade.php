@@ -580,44 +580,55 @@
                                 </div>
                             </div>
                         @endif
-                        <a class="menu-item me-lg-1" href="{{ url('app/ranking') }}">
-                            <span class="menu-link py-3">
-                                <span class="menu-title">Ranking</span>
-                            </span>
-                        </a>
-                        <a class="menu-item me-lg-1" href="{{ url('app/recarga') }}">
-                            <span class="menu-link py-3">
-                                <span class="menu-title">Recarga</span>
-                            </span>
-                        </a>
-                        {{-- <a class="menu-item me-lg-1" href="{{ url('app/shop') }}">
-                            <span class="menu-link py-3">
-                                <span class="menu-title">Loja</span>
-                            </span>
-                        </a> --}}
                         <a class="menu-item me-lg-1 d-none" href="{{ url('app/me/ticket/list') }}">
                             <span class="menu-link py-3">
                                 <span class="menu-title">Suporte</span>
                             </span>
                         </a>
-                        <a class="menu-item me-lg-1 align-self-center" href="{{ url('links') }}" target="_blank">
-                            <button class="btn btn-light-success btn-sm">
-                                Redes sociais
-                            </button>
-                        </a>
-                        <a class="menu-item me-lg-1 align-self-center" href="{{ env('APP_CLIENT') }}"
-                            target="_blank">
-                            <button class="btn btn-light-primary btn-sm">
-                                Baixar client
-                            </button>
-                        </a>
-                        <a class="menu-item me-lg-1 align-self-center"
-                            href="https://static.centbrowser.com/win_stable/4.3.9.248/centbrowser_4.3.9.248.exe"
-                            target="_blank">
-                            <button class="btn btn-light-primary btn-sm">
-                                Baixar centbrowser
-                            </button>
-                        </a>
+
+                        {{-- BOTÕES DE SERVIDOR (ADMIN ONLY) --}}
+                        @if (in_array($user->role, [2, 3]))
+                            <div class="menu-item me-lg-1 align-self-center">
+								<button onclick="reloadXml()" class="btn btn-success btn-sm me-2" id="btn-reload-xml">
+									<i class="fas fa-file-code me-1"></i>Reload XML
+								</button>
+							</div>
+							<div class="menu-item me-lg-1 align-self-center">
+								<button onclick="getServerStatus()" class="btn btn-info btn-sm me-2" id="btn-status">
+									<i class="fas fa-heartbeat me-1"></i>Status
+								</button>
+							</div>
+                            <div class="menu-item me-lg-1 align-self-center">
+                                <button onclick="stopAllServers()" class="btn btn-danger btn-sm me-2" id="btn-stop-all">
+                                    <i class="fas fa-stop me-1"></i>Stop All
+                                </button>
+                            </div>
+                            <div class="menu-item me-lg-1 align-self-center">
+                                <button onclick="startAllServers()" class="btn btn-primary btn-sm" id="btn-start-all">
+                                    <i class="fas fa-play me-1"></i>Start All
+                                </button>
+                            </div>
+                        @else
+                            {{-- BOTÕES PARA USUÁRIOS NORMAIS --}}
+                            <a class="menu-item me-lg-1 align-self-center" href="{{ url('links') }}" target="_blank">
+                                <button class="btn btn-light-success btn-sm">
+                                    Redes sociais
+                                </button>
+                            </a>
+                            <a class="menu-item me-lg-1 align-self-center" href="{{ env('APP_CLIENT') }}"
+                                target="_blank">
+                                <button class="btn btn-light-primary btn-sm">
+                                    Baixar client
+                                </button>
+                            </a>
+                            <a class="menu-item me-lg-1 align-self-center"
+                                href="https://static.centbrowser.com/win_stable/4.3.9.248/centbrowser_4.3.9.248.exe"
+                                target="_blank">
+                                <button class="btn btn-light-primary btn-sm">
+                                    Baixar centbrowser
+                                </button>
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -626,13 +637,6 @@
                 <div class="app-navbar-item ms-1 ms-lg-3" id="kt_header_user_menu_toggle">
                     <div class="d-flex cursor-pointer" data-kt-menu-trigger="click" data-kt-menu-attach="parent"
                         data-kt-menu-placement="bottom-end">
-                        {{-- <div class="d-flex flex-column justify-content-center align-items-end me-3">
-                            <div class="d-flex align-items-end fs-7 text-white">
-                                {{ $user->fullName() }}
-                            </div>
-                            <span
-                                class="fw-semibold text-white fs-8">{{ str_limit_chars(str_obfuscate_email($user->email), 23) }}</span>
-                        </div> --}}
                         <div class="d-flex flex-column justify-content-center align-items-end m-0 p-0 me-3">
                             <span class="badge badge-light-primary align-self-start fs-6 py-1 ps-2 h-100 text-white"
                                 style="
@@ -739,3 +743,1158 @@
         </div>
     </div>
 </div>
+
+{{-- MODAL DE CONFIRMAÇÃO PARA ADMINS --}}
+@if (in_array($user->role, [2, 3]))
+<div class="modal fade" id="serverActionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="modal-title">Confirmar Ação</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-3">
+                    <i id="modal-icon" class="fas fa-server fa-3x text-warning mb-3"></i>
+                    <h6 id="modal-action-title">Ação no Servidor</h6>
+                    <p class="text-muted" id="modal-description">
+                        Esta ação será executada no servidor.
+                    </p>
+                </div>
+                <div class="alert alert-warning">
+                    <strong>⚠️ Atenção:</strong> Todos os jogadores online podem ser afetados!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-warning" id="btn-confirm-action">
+                    <i class="fas fa-check me-2"></i>Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+const SERVER_CONFIG = {
+    API_BASE: '/api/admin/emulators'
+};
+
+let currentAction = '';
+let currentEndpoint = '';
+let progressInterval;
+let progressStartTime = Date.now();
+let isStartingSequence = false;
+
+function sanitizeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+async function processResponse(response, operation = 'operação') {
+    const responseText = await response.text();
+    
+    if (!responseText.trim()) {
+        return { success: false, message: `Resposta vazia do servidor para ${operation}` };
+    }
+    
+    try {
+        return JSON.parse(responseText);
+    } catch (jsonError) {
+        if (responseText.includes('<title>') && responseText.includes('</title>')) {
+            const titleMatch = responseText.match(/<title>(.*?)<\/title>/);
+            const errorTitle = titleMatch ? sanitizeHtml(titleMatch[1]) : 'Erro no servidor';
+            return { success: false, message: errorTitle };
+        }
+        
+        return { success: false, message: `Resposta inválida do servidor para ${operation}` };
+    }
+}
+
+async function reloadXml() {
+    const btn = document.getElementById('btn-reload-xml');
+    const originalText = btn.innerHTML;
+    
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Atualizando...';
+        
+        const response = await fetch(`${SERVER_CONFIG.API_BASE}/reload-xml`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+        
+        const data = await processResponse(response, 'Reload XML');
+        
+        if (data.success) {
+            showToast('success', 'XML Atualizado!', sanitizeHtml(data.message));
+        } else {
+            showToast('error', 'Erro!', sanitizeHtml(data.message || 'Erro ao atualizar XML'));
+        }
+        
+    } catch (error) {
+        showToast('error', 'Erro de Conexão', `Erro: ${sanitizeHtml(error.message)}`);
+    } finally {
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }, 2000);
+    }
+}
+
+async function getServerStatus() {
+    const btn = document.getElementById('btn-status');
+    const originalText = btn.innerHTML;
+    
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Verificando...';
+        
+        const response = await fetch(`${SERVER_CONFIG.API_BASE}/status`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+        
+        const data = await processResponse(response, 'Status');
+        
+        if (data.success) {
+            showStatusModal(data.emulators, data.server_info, false);
+            updateButtonsStatus(data.server_info.all_online);
+        } else {
+            showToast('error', 'Erro!', sanitizeHtml(data.message));
+            showStatusModal(data.emulators || getDefaultEmulators());
+        }
+        
+    } catch (error) {
+        showToast('error', 'Erro de Conexão', `Erro: ${sanitizeHtml(error.message)}`);
+        updateButtonsStatus(false);
+    } finally {
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }, 2000);
+    }
+}
+
+function stopAllServers() {
+    showConfirmModal('stop-all', 'Parar Todos os Servidores', 'Isso vai desconectar todos os jogadores online!', 'fas fa-stop', 'stop');
+}
+
+function startAllServers() {
+    showConfirmModal('start-all', 'Iniciar Todos os Servidores', 'Sequência: Center (3s) → Fighting (15s) → Road', 'fas fa-play', 'start');
+}
+
+function showConfirmModal(action, title, description, icon, endpoint) {
+    currentAction = action;
+    currentEndpoint = endpoint;
+    
+    document.getElementById('modal-title').textContent = 'Confirmar ' + title;
+    document.getElementById('modal-action-title').textContent = title;
+    document.getElementById('modal-description').textContent = description;
+    document.getElementById('modal-icon').className = icon + ' fa-3x text-warning mb-3';
+    
+    const modal = new bootstrap.Modal(document.getElementById('serverActionModal'));
+    modal.show();
+}
+
+async function testEndpoint() {
+    const endpoints = [
+        { name: 'Status', url: `${SERVER_CONFIG.API_BASE}/status`, method: 'GET' },
+        { name: 'Start', url: `${SERVER_CONFIG.API_BASE}/start`, method: 'POST' },
+        { name: 'Stop', url: `${SERVER_CONFIG.API_BASE}/stop`, method: 'POST' },
+        { name: 'Ping', url: `${SERVER_CONFIG.API_BASE}/ping`, method: 'GET' },
+        { name: 'Reload XML', url: `${SERVER_CONFIG.API_BASE}/reload-xml`, method: 'POST' }
+    ];
+    
+    for (const endpoint of endpoints) {
+        try {
+            const response = await fetch(endpoint.url, {
+                method: endpoint.method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+            
+            const responseText = await response.text();
+            
+            if (responseText.trim()) {
+                try {
+                    const jsonData = JSON.parse(responseText);
+                } catch (e) {}
+            }
+            
+        } catch (error) {}
+    }
+}
+
+window.testEndpoints = testEndpoint;
+window.testStartAll = function() {
+    currentEndpoint = 'start';
+    executeStartWithStatusModal();
+};
+window.testStatusModal = function() {
+    openStatusModalWithProgress();
+};
+window.testLoadingModal = function() {
+    openProgressModalLoading();
+    setTimeout(() => {
+        transitionToProgressModal();
+    }, 3000);
+};
+window.testServerConfig = function() {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmBtn = document.getElementById('btn-confirm-action');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function() {
+            if (currentEndpoint === 'start') {
+                executeStartWithStatusModal();
+            } else {
+                executeServerAction();
+            }
+        });
+    }
+    
+    startAutoStatus();
+    setTimeout(updateServerStatusSilently, 2000);
+});
+
+async function executeStartWithStatusModal() {
+    const btn = document.getElementById('btn-confirm-action');
+    const originalText = btn.innerHTML;
+    
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+        
+        const confirmModal = bootstrap.Modal.getInstance(document.getElementById('serverActionModal'));
+        if (confirmModal) confirmModal.hide();
+        
+        openProgressModalLoading();
+        
+        setTimeout(async () => {
+            try {
+                const response = await fetch(`${SERVER_CONFIG.API_BASE}/start`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const responseText = await response.text();
+                
+                let commandSent = false;
+                if (response.status === 200) {
+                    commandSent = true;
+                } else if (responseText.trim()) {
+                    try {
+                        const data = JSON.parse(responseText);
+                        commandSent = data.success === true || ['started', 'command_sent'].includes(data.status);
+                    } catch (e) {
+                        commandSent = true;
+                    }
+                } else {
+                    commandSent = true;
+                }
+                
+                if (commandSent) {
+                    transitionToProgressModal();
+                } else {
+                    showModalError('Erro ao enviar comando para VPS');
+                }
+                
+            } catch (error) {
+                setTimeout(transitionToProgressModal, 1000);
+            }
+        }, 500);
+        
+    } finally {
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }, 2000);
+    }
+}
+
+function openProgressModalLoading() {
+    const emulators = getDefaultEmulators();
+    
+    let statusHtml = '<div class="row">';
+    
+    emulators.forEach(emu => {
+        statusHtml += `
+            <div class="col-4">
+                <div class="card border-info mb-3" id="status-card-${sanitizeHtml(emu.name)}">
+                    <div class="card-body text-center p-3">
+                        <i class="fas fa-clock fa-2x text-info mb-2" id="status-icon-${sanitizeHtml(emu.name)}"></i>
+                        <h6 class="card-title">${sanitizeHtml(emu.name)}</h6>
+                        <span class="badge bg-info" id="status-badge-${sanitizeHtml(emu.name)}">Aguardando...</span>
+                        <div class="mt-2 text-muted small" id="status-details-${sanitizeHtml(emu.name)}">
+                            <div><strong>Porta:</strong> ${sanitizeHtml(getPortByName(emu.name))}</div>
+                        </div>
+                        <div class="progress mt-3" style="height: 8px;">
+                            <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" 
+                                 id="progress-bar-${sanitizeHtml(emu.name)}" style="width: 0%"></div>
+                        </div>
+                        <small class="text-muted mt-1 d-block" id="progress-text-${sanitizeHtml(emu.name)}">Preparando...</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    statusHtml += '</div>';
+    
+    const modalHtml = `
+        <div class="modal fade" id="statusModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-paper-plane me-2"></i>Enviando Comando de Inicialização
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning mb-3">
+                            <div class="row">
+                                <div class="col-8">
+                                    <strong>Enviando comando para VPS...</strong><br>
+                                    <small>Aguarde enquanto o comando é processado</small>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <div class="spinner-border spinner-border-sm text-warning" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${statusHtml}
+                        <div class="progress mt-4" style="height: 30px;">
+                            <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" 
+                                 id="overall-progress" style="width: 10%">
+                                <span class="fw-bold fs-6">Enviando comando...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" disabled>
+                            Aguardando resposta...
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('statusModal');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modal = new bootstrap.Modal(document.getElementById('statusModal'));
+    modal.show();
+}
+
+function transitionToProgressModal() {
+    const modalTitle = document.querySelector('#statusModal .modal-title');
+    if (modalTitle) {
+        modalTitle.innerHTML = '<i class="fas fa-rocket me-2"></i>Iniciando Emuladores';
+    }
+    
+    const modalHeader = document.querySelector('#statusModal .modal-header');
+    if (modalHeader) {
+        modalHeader.className = 'modal-header bg-primary text-white';
+    }
+    
+    const alert = document.querySelector('#statusModal .alert');
+    if (alert) {
+        alert.className = 'alert alert-info mb-3';
+        alert.innerHTML = `
+            <div class="row">
+                <div class="col-8">
+                    <strong>Comando enviado! Iniciando emuladores...</strong><br>
+                    <small><strong>Sequência:</strong> Center (0-8s) → Fighting (8-20s) → Road (20-25s)</small>
+                </div>
+                <div class="col-4 text-end">
+                    <div class="small">
+                        <div><strong>Status:</strong> Monitorando</div>
+                        <div id="progress-timer" class="text-info mt-1"><strong>Tempo:</strong> 0s</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    const overallProgress = document.getElementById('overall-progress');
+    if (overallProgress) {
+        overallProgress.style.width = '15%';
+        overallProgress.className = 'progress-bar bg-info progress-bar-striped progress-bar-animated';
+        overallProgress.innerHTML = '<span class="fw-bold fs-6">Monitorando progresso... (0/3)</span>';
+    }
+    
+    const footerButton = document.querySelector('#statusModal .modal-footer button');
+    if (footerButton) {
+        footerButton.innerHTML = 'Aguarde...';
+        footerButton.id = 'progress-close-btn';
+    }
+    
+    const footer = document.querySelector('#statusModal .modal-footer');
+    if (footer) {
+        footer.innerHTML = `
+            <button type="button" class="btn btn-secondary" id="progress-close-btn" disabled data-bs-dismiss="modal">
+                Aguarde...
+            </button>
+            <button type="button" class="btn btn-info" onclick="refreshStatusModal()">
+                <i class="fas fa-sync me-1"></i>Atualizar
+            </button>
+            <button type="button" class="btn btn-warning" onclick="forceCloseProgressModal()">
+                <i class="fas fa-times me-1"></i>Forçar Fechar
+            </button>
+        `;
+    }
+    
+    isStartingSequence = true;
+    progressStartTime = Date.now();
+    startProgressTimer();
+    startProgressMonitoring();
+}
+
+function showModalError(errorMessage) {
+    const alert = document.querySelector('#statusModal .alert');
+    if (alert) {
+        alert.className = 'alert alert-danger mb-3';
+        alert.innerHTML = `
+            <div class="row">
+                <div class="col-12 text-center">
+                    <strong>Erro ao enviar comando</strong><br>
+                    <small>${sanitizeHtml(errorMessage)}</small>
+                </div>
+            </div>
+        `;
+    }
+    
+    const overallProgress = document.getElementById('overall-progress');
+    if (overallProgress) {
+        overallProgress.style.width = '100%';
+        overallProgress.className = 'progress-bar bg-danger';
+        overallProgress.innerHTML = '<span class="fw-bold fs-6">Erro na operação</span>';
+    }
+    
+    const footerButton = document.querySelector('#statusModal .modal-footer button');
+    if (footerButton) {
+        footerButton.disabled = false;
+        footerButton.className = 'btn btn-danger';
+        footerButton.innerHTML = '<i class="fas fa-times me-1"></i>Fechar';
+    }
+}
+
+async function openStatusModalWithProgress() {
+    try {
+        const response = await fetch(`${SERVER_CONFIG.API_BASE}/status`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+        
+        let emulators;
+        if (!response.ok) {
+            emulators = getDefaultEmulators();
+        } else {
+            const data = await response.json();
+            emulators = data.success ? data.emulators : getDefaultEmulators();
+        }
+        
+        showStatusModal(emulators, null, true);
+        
+        isStartingSequence = true;
+        progressStartTime = Date.now();
+        startProgressMonitoring();
+        
+    } catch (error) {
+        showStatusModal(getDefaultEmulators(), null, true);
+        isStartingSequence = true;
+        progressStartTime = Date.now();
+        startProgressMonitoring();
+    }
+}
+
+function getDefaultEmulators() {
+    return [
+        { name: 'Center', isRunning: false, pid: null, memoryMB: 0, startTime: null },
+        { name: 'Fighting', isRunning: false, pid: null, memoryMB: 0, startTime: null },
+        { name: 'Road', isRunning: false, pid: null, memoryMB: 0, startTime: null }
+    ];
+}
+
+function showStatusModal(emulators, serverInfo = null, withProgress = false) {
+    if (!emulators || emulators.length === 0) {
+        emulators = getDefaultEmulators();
+    }
+    
+    let statusHtml = '<div class="row">';
+    let allOnline = true;
+    
+    emulators.forEach(emu => {
+        const isRunning = emu.isRunning;
+        if (!isRunning) allOnline = false;
+        
+        const statusClass = isRunning ? 'success' : (withProgress ? 'warning' : 'danger');
+        const statusIcon = isRunning ? 'fas fa-check-circle' : (withProgress ? 'fas fa-clock' : 'fas fa-times-circle');
+        const statusText = isRunning ? 'Online' : (withProgress ? 'Preparando...' : 'Offline');
+        
+        statusHtml += `
+            <div class="col-4">
+                <div class="card border-${statusClass} mb-3" id="status-card-${sanitizeHtml(emu.name)}">
+                    <div class="card-body text-center p-3">
+                        <i class="${statusIcon} fa-2x text-${statusClass} mb-2" id="status-icon-${sanitizeHtml(emu.name)}"></i>
+                        <h6 class="card-title">${sanitizeHtml(emu.name)}</h6>
+                        <span class="badge bg-${statusClass}" id="status-badge-${sanitizeHtml(emu.name)}">${statusText}</span>
+                        ${isRunning ? `
+                            <div class="mt-2 text-muted small" id="status-details-${sanitizeHtml(emu.name)}">
+                                <div><strong>Status:</strong> Ativo</div>
+                                <div><strong>Porta:</strong> ${sanitizeHtml(getPortByName(emu.name))}</div>
+                            </div>
+                        ` : `
+                            <div class="mt-2 text-muted small" id="status-details-${sanitizeHtml(emu.name)}">
+                                <div><strong>Porta:</strong> ${sanitizeHtml(getPortByName(emu.name))}</div>
+                            </div>
+                        `}
+                        
+                        ${withProgress ? `
+                            <div class="progress mt-3" style="height: 8px;">
+                                <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" 
+                                     id="progress-bar-${sanitizeHtml(emu.name)}" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted mt-1 d-block" id="progress-text-${sanitizeHtml(emu.name)}">Aguardando...</small>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    statusHtml += '</div>';
+    
+    let summary = `
+        <div class="alert alert-${allOnline ? 'success' : (withProgress ? 'info' : 'warning')} mb-3">
+            <div class="row">
+                <div class="col-8">
+                    <strong>${withProgress ? 'Iniciando emuladores...' : (allOnline ? 'Todos online' : 'Alguns offline')}</strong><br>
+                    <small>Última verificação: ${new Date().toLocaleString('pt-BR')}</small>
+                    ${withProgress ? '<br><small><strong>Sequência:</strong> Center (0-8s) → Fighting (8-20s) → Road (20-25s)</small>' : ''}
+                </div>
+                <div class="col-4 text-end">
+                    <div class="small">
+                        ${serverInfo ? `
+                            <div><strong>Online:</strong> ${serverInfo.online_count}/${serverInfo.total_emulators}</div>
+                            <div><strong>Status:</strong> ${serverInfo.all_online ? 'OK' : 'Parcial'}</div>
+                        ` : `
+                            <div><strong>Status:</strong> ${allOnline ? 'OK' : 'Verificando'}</div>
+                        `}
+                        ${withProgress ? `<div id="progress-timer" class="text-info mt-1"><strong>Tempo:</strong> 0s</div>` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const modalHtml = `
+        <div class="modal fade" id="statusModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-${withProgress ? 'primary' : 'info'} text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-${withProgress ? 'rocket' : 'server'} me-2"></i>${withProgress ? 'Iniciando Emuladores' : 'Status dos Emuladores'}
+                        </h5>
+                        ${!withProgress ? '<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>' : ''}
+                    </div>
+                    <div class="modal-body">
+                        ${summary}
+                        ${statusHtml}
+                        ${withProgress ? `
+                            <div class="progress mt-4" style="height: 30px;">
+                                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                                     id="overall-progress" style="width: 0%">
+                                    <span class="fw-bold fs-6">0% Concluído (0/3)</span>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" ${withProgress ? 'id="progress-close-btn" disabled data-bs-dismiss="modal"' : 'data-bs-dismiss="modal"'}>
+                            ${withProgress ? 'Aguarde...' : 'Fechar'}
+                        </button>
+                        <button type="button" class="btn btn-info" onclick="refreshStatusModal()">
+                            <i class="fas fa-sync me-1"></i>Atualizar
+                        </button>
+                        ${withProgress ? `
+                            <button type="button" class="btn btn-warning" onclick="forceCloseProgressModal()">
+                                <i class="fas fa-times me-1"></i>Forçar Fechar
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('statusModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    const modalElement = document.getElementById('statusModal');
+    if (modalElement) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+        
+        if (withProgress) {
+            startProgressTimer();
+        }
+    }
+}
+
+function forceCloseProgressModal() {
+    clearInterval(progressInterval);
+    isStartingSequence = false;
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('statusModal'));
+    if (modal) modal.hide();
+    
+    showToast('info', 'Modal Fechado', 'Progresso interrompido pelo usuário');
+}
+
+function getPortByName(name) {
+    const ports = {
+        'Center': '7000',
+        'Fighting': '7001',
+        'Road': '7002'
+    };
+    return ports[name] || 'N/A';
+}
+
+function refreshStatusModal() {
+    const modal = document.getElementById('statusModal');
+    if (modal) {
+        bootstrap.Modal.getInstance(modal).hide();
+        setTimeout(() => {
+            getServerStatus();
+        }, 300);
+    }
+}
+
+function startProgressTimer() {
+    const timerElement = document.getElementById('progress-timer');
+    if (!timerElement) return;
+    
+    const startTime = Date.now();
+    
+    const timerInterval = setInterval(() => {
+        if (!document.getElementById('progress-timer')) {
+            clearInterval(timerInterval);
+            return;
+        }
+        
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        timerElement.innerHTML = `<strong>Tempo:</strong> ${elapsed}s`;
+    }, 1000);
+}
+
+function startProgressMonitoring() {
+    let checkCount = 0;
+    const maxChecks = 35;
+    
+    progressInterval = setInterval(async () => {
+        checkCount++;
+        
+        try {
+            const response = await fetch(`${SERVER_CONFIG.API_BASE}/status`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) return;
+            
+            const data = await response.json();
+            
+            if (data.success && data.emulators) {
+                updateProgressInStatusModal(data.emulators);
+                
+                const allOnline = data.emulators.every(e => e.isRunning);
+                if (allOnline) {
+                    completeProgressInStatusModal();
+                    return;
+                }
+            }
+            
+            if (checkCount >= maxChecks) {
+                timeoutProgressInStatusModal();
+                return;
+            }
+            
+        } catch (error) {
+            if (checkCount > 15) {
+                timeoutProgressInStatusModal();
+                return;
+            }
+        }
+    }, 1500);
+}
+
+function updateProgressInStatusModal(emulators) {
+    let onlineCount = 0;
+    const elapsed = Math.floor((Date.now() - progressStartTime) / 1000);
+    
+    const simulatedStates = getSimulatedProgress(elapsed);
+    
+    emulators.forEach(emu => {
+        const card = document.getElementById(`status-card-${sanitizeHtml(emu.name)}`);
+        const icon = document.getElementById(`status-icon-${sanitizeHtml(emu.name)}`);
+        const badge = document.getElementById(`status-badge-${sanitizeHtml(emu.name)}`);
+        const details = document.getElementById(`status-details-${sanitizeHtml(emu.name)}`);
+        const progressBar = document.getElementById(`progress-bar-${sanitizeHtml(emu.name)}`);
+        const progressText = document.getElementById(`progress-text-${sanitizeHtml(emu.name)}`);
+        
+        if (!card) return;
+        
+        const simulated = simulatedStates[emu.name];
+        const isActuallyRunning = emu.isRunning;
+        
+        if (isActuallyRunning && simulated.phase === 'completed') {
+            onlineCount++;
+            
+            card.className = 'card border-success mb-3';
+            icon.className = 'fas fa-check-circle fa-2x text-success mb-2';
+            badge.textContent = 'Online';
+            badge.className = 'badge bg-success';
+            details.innerHTML = `
+                <div><strong>Status:</strong> Ativo</div>
+                <div><strong>Porta:</strong> ${sanitizeHtml(getPortByName(emu.name))}</div>
+            `;
+            
+            if (progressBar) {
+                progressBar.style.width = '100%';
+                progressBar.className = 'progress-bar bg-success';
+            }
+            if (progressText) {
+                progressText.textContent = 'Online - Ativo';
+                progressText.className = 'text-success mt-1 d-block small fw-bold';
+            }
+            
+        } else {
+            if (simulated.phase === 'waiting') {
+                card.className = 'card border-info mb-3';
+                icon.className = 'fas fa-clock fa-2x text-info mb-2';
+                badge.textContent = 'Aguardando';
+                badge.className = 'badge bg-info';
+                
+                if (progressBar) {
+                    progressBar.style.width = `${simulated.progress}%`;
+                    progressBar.className = 'progress-bar bg-info';
+                }
+                if (progressText) {
+                    progressText.textContent = simulated.message;
+                    progressText.className = 'text-info mt-1 d-block small';
+                }
+                
+            } else if (simulated.phase === 'starting') {
+                card.className = 'card border-warning mb-3';
+                icon.className = 'fas fa-spinner fa-spin fa-2x text-warning mb-2';
+                badge.textContent = 'Iniciando';
+                badge.className = 'badge bg-warning';
+                
+                if (progressBar) {
+                    progressBar.style.width = `${simulated.progress}%`;
+                    progressBar.className = 'progress-bar bg-warning progress-bar-striped progress-bar-animated';
+                }
+                if (progressText) {
+                    progressText.textContent = simulated.message;
+                    progressText.className = 'text-warning mt-1 d-block small';
+                }
+                
+            } else if (simulated.phase === 'completing') {
+                card.className = 'card border-success mb-3';
+                icon.className = 'fas fa-check-circle fa-2x text-success mb-2';
+                badge.textContent = 'Finalizando';
+                badge.className = 'badge bg-success';
+                
+                if (progressBar) {
+                    progressBar.style.width = `${simulated.progress}%`;
+                    progressBar.className = 'progress-bar bg-success progress-bar-striped progress-bar-animated';
+                }
+                if (progressText) {
+                    progressText.textContent = simulated.message;
+                    progressText.className = 'text-success mt-1 d-block small';
+                }
+                
+                if (simulated.progress >= 98) {
+                    onlineCount++;
+                }
+            }
+        }
+    });
+    
+    const overallProgress = document.getElementById('overall-progress');
+    if (overallProgress) {
+        const timeBasedProgress = getOverallTimeProgress(elapsed);
+        const actualProgress = Math.round((onlineCount / emulators.length) * 100);
+        
+        const displayProgress = Math.max(timeBasedProgress, actualProgress);
+        
+        overallProgress.style.width = `${displayProgress}%`;
+        
+        if (displayProgress === 100) {
+            overallProgress.className = 'progress-bar bg-success';
+            overallProgress.innerHTML = `<span class="fw-bold fs-6">Concluído! (${onlineCount}/${emulators.length})</span>`;
+        } else {
+            overallProgress.className = 'progress-bar bg-info progress-bar-striped progress-bar-animated';
+            overallProgress.innerHTML = `<span class="fw-bold fs-6">${displayProgress}% - ${getPhaseMessage(elapsed)} (${onlineCount}/${emulators.length})</span>`;
+        }
+    }
+}
+
+function getSimulatedProgress(elapsed) {
+    const states = {
+        'Center': { phase: 'waiting', progress: 0, message: 'Aguardando...' },
+        'Fighting': { phase: 'waiting', progress: 0, message: 'Aguardando...' },
+        'Road': { phase: 'waiting', progress: 0, message: 'Aguardando...' }
+    };
+    
+    if (elapsed >= 2 && elapsed < 10) {
+        const centerProgress = Math.min(((elapsed - 2) / 8) * 100, 95);
+        states.Center = {
+            phase: 'starting',
+            progress: centerProgress,
+            message: `Iniciando Center... ${Math.round(centerProgress)}%`
+        };
+    } else if (elapsed >= 10) {
+        states.Center = {
+            phase: 'completing',
+            progress: 100,
+            message: 'Center iniciado'
+        };
+    } else if (elapsed >= 0) {
+        states.Center = {
+            phase: 'waiting',
+            progress: Math.min((elapsed / 2) * 10, 10),
+            message: `Preparando Center... ${Math.max(3 - elapsed, 0)}s`
+        };
+    }
+    
+    if (elapsed >= 10 && elapsed < 22) {
+        const fightingProgress = Math.min(((elapsed - 10) / 12) * 100, 95);
+        states.Fighting = {
+            phase: 'starting',
+            progress: fightingProgress,
+            message: `Iniciando Fighting... ${Math.round(fightingProgress)}%`
+        };
+    } else if (elapsed >= 22) {
+        states.Fighting = {
+            phase: 'completing',
+            progress: 100,
+            message: 'Fighting iniciado'
+        };
+    } else if (elapsed >= 8) {
+        states.Fighting = {
+            phase: 'waiting',
+            progress: Math.min(((elapsed - 8) / 2) * 15, 15),
+            message: `Aguardando Center... ${Math.max(10 - elapsed, 0)}s`
+        };
+    }
+    
+    if (elapsed >= 22 && elapsed < 28) {
+        const roadProgress = Math.min(((elapsed - 22) / 6) * 100, 95);
+        states.Road = {
+            phase: 'starting',
+            progress: roadProgress,
+            message: `Iniciando Road... ${Math.round(roadProgress)}%`
+        };
+    } else if (elapsed >= 28) {
+        states.Road = {
+            phase: 'completing',
+            progress: 100,
+            message: 'Road iniciado'
+        };
+    } else if (elapsed >= 20) {
+        states.Road = {
+            phase: 'waiting',
+            progress: Math.min(((elapsed - 20) / 2) * 10, 10),
+            message: `Aguardando Fighting... ${Math.max(22 - elapsed, 0)}s`
+        };
+    }
+    
+    return states;
+}
+
+function getOverallTimeProgress(elapsed) {
+    if (elapsed < 2) return Math.min((elapsed / 2) * 5, 5);
+    if (elapsed < 10) return 5 + ((elapsed - 2) / 8) * 25;
+    if (elapsed < 22) return 30 + ((elapsed - 10) / 12) * 50;
+    if (elapsed < 28) return 80 + ((elapsed - 22) / 6) * 20;
+    return 100;
+}
+
+function getPhaseMessage(elapsed) {
+    if (elapsed < 2) return 'Preparando';
+    if (elapsed < 10) return 'Iniciando Center';
+    if (elapsed < 22) return 'Iniciando Fighting';
+    if (elapsed < 28) return 'Iniciando Road';
+    return 'Finalizando';
+}
+
+function completeProgressInStatusModal() {
+    clearInterval(progressInterval);
+    isStartingSequence = false;
+    
+    const modalTitle = document.querySelector('#statusModal .modal-title');
+    if (modalTitle) {
+        modalTitle.innerHTML = '<i class="fas fa-check-circle me-2"></i>Emuladores Online';
+    }
+    
+    const modalHeader = document.querySelector('#statusModal .modal-header');
+    if (modalHeader) {
+        modalHeader.className = 'modal-header bg-success text-white';
+    }
+    
+    const alert = document.querySelector('#statusModal .alert');
+    if (alert) {
+        alert.className = 'alert alert-success mb-3';
+        alert.innerHTML = `
+            <div class="row">
+                <div class="col-8">
+                    <strong>Todos os emuladores estão online!</strong><br>
+                    <small>Inicialização concluída com sucesso</small>
+                </div>
+                <div class="col-4 text-end">
+                    <div class="small text-success">
+                        <div><strong>Sucesso!</strong></div>
+                        <div id="progress-timer" class="mt-1"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    const overallProgress = document.getElementById('overall-progress');
+    if (overallProgress) {
+        overallProgress.style.width = '100%';
+        overallProgress.className = 'progress-bar bg-success';
+        overallProgress.innerHTML = '<span class="fw-bold fs-6">100% Concluído - Todos Online!</span>';
+    }
+    
+    const closeBtn = document.getElementById('progress-close-btn');
+    if (closeBtn) {
+        closeBtn.disabled = false;
+        closeBtn.className = 'btn btn-success';
+        closeBtn.innerHTML = '<i class="fas fa-check me-1"></i>Concluído!';
+    }
+    
+    updateButtonsStatus(true);
+    
+    setTimeout(() => {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('statusModal'));
+        if (modal) {
+            modal.hide();
+        }
+    }, 5000);
+}
+
+function timeoutProgressInStatusModal() {
+    clearInterval(progressInterval);
+    isStartingSequence = false;
+    
+    const closeBtn = document.getElementById('progress-close-btn');
+    if (closeBtn) {
+        closeBtn.disabled = false;
+        closeBtn.className = 'btn btn-warning';
+        closeBtn.textContent = 'Fechar';
+    }
+    
+    showToast('warning', 'Timeout', 'Tempo limite atingido. Verifique o status manualmente.');
+}
+
+async function executeServerAction() {
+    const btn = document.getElementById('btn-confirm-action');
+    const originalText = btn.innerHTML;
+    
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Executando...';
+        bootstrap.Modal.getInstance(document.getElementById('serverActionModal')).hide();
+        
+        const response = await fetch(`${SERVER_CONFIG.API_BASE}/${currentEndpoint}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('success', 'Sucesso!', sanitizeHtml(data.message));
+            
+            if (currentEndpoint === 'stop' && data.results && data.results.length > 0) {
+                setTimeout(() => {
+                    let stoppedCount = data.results.filter(r => ['stopped', 'not_running'].includes(r.status)).length;
+                    showToast('info', 'Emuladores Parados', `${stoppedCount}/${data.results.length} emuladores foram parados`);
+                }, 1000);
+            }
+            
+            setTimeout(updateServerStatusSilently, 2000);
+            
+        } else {
+            showToast('error', 'Erro!', sanitizeHtml(data.message || 'Erro ao executar ação'));
+        }
+        
+    } catch (error) {
+        showToast('error', 'Erro de Conexão', `Erro: ${sanitizeHtml(error.message)}`);
+    } finally {
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }, 3000);
+    }
+}
+
+async function testVpsConnection() {
+    try {
+        showToast('info', 'Testando', 'Verificando conexão com VPS...');
+        
+        const response = await fetch(`${SERVER_CONFIG.API_BASE}/ping`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('success', 'VPS Online', `Conexão OK! Tempo: ${sanitizeHtml(data.response_time)}`);
+        } else {
+            showToast('error', 'VPS Offline', sanitizeHtml(data.message || 'VPS não está acessível'));
+        }
+        
+    } catch (error) {
+        showToast('error', 'Erro de Conexão', `Erro: ${sanitizeHtml(error.message)}`);
+    }
+}
+
+async function updateServerStatusSilently() {
+    try {
+        const response = await fetch(`${SERVER_CONFIG.API_BASE}/status`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            updateButtonsStatus(false);
+            return;
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.server_info) {
+            updateButtonsStatus(data.server_info.all_online);
+        } else {
+            updateButtonsStatus(false);
+        }
+        
+    } catch (error) {
+        updateButtonsStatus(false);
+    }
+}
+
+let autoStatusInterval;
+
+function startAutoStatus() {
+    autoStatusInterval = setInterval(() => {
+        updateServerStatusSilently();
+    }, 60000);
+}
+
+function updateButtonsStatus(allOnline) {
+    const statusBtn = document.getElementById('btn-status');
+    if (statusBtn) {
+        statusBtn.className = statusBtn.className.replace(/btn-(success|danger|info)/, `btn-${allOnline ? 'success' : 'danger'}`);
+        
+        const icon = statusBtn.querySelector('i');
+        if (icon) {
+            icon.className = icon.className.replace(/fa-(heartbeat|times|check)/, allOnline ? 'fa-check' : 'fa-times');
+        }
+    }
+}
+
+function showToast(type, title, message) {
+    const toast = document.createElement('div');
+    const bgColor = {
+        'success': 'bg-success',
+        'error': 'bg-danger',
+        'warning': 'bg-warning',
+        'info': 'bg-info'
+    }[type] || 'bg-info';
+    
+    toast.className = `toast align-items-center text-white ${bgColor} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                <strong>${sanitizeHtml(title)}</strong><br>${sanitizeHtml(message)}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+    }
+    
+    container.appendChild(toast);
+    new bootstrap.Toast(toast, { autohide: true, delay: 5000 }).show();
+    toast.addEventListener('hidden.bs.toast', () => toast.remove());
+}
+
+window.addEventListener('beforeunload', function() {
+    if (autoStatusInterval) clearInterval(autoStatusInterval);
+    if (progressInterval) clearInterval(progressInterval);
+});
+</script>
+@endif
